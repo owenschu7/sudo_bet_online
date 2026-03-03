@@ -1,6 +1,7 @@
 #include "Screen.h"
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include "../../UI/UIHelper.h"
 
 class MainMenuScreen : public Screen
 {
@@ -12,6 +13,8 @@ private:
   //declare the font and UI elements here
   sf::Font font;
   sf::Text titleText;
+
+  //play button
   sf::RectangleShape playButton;
   sf::Text playButtonText;
 
@@ -24,7 +27,7 @@ public:
     menuBackground.setFillColor(sf::Color(20, 20, 50));
 
     //load the font firectly from the file
-    if (!font.openFromFile("assets/8bitOperatorPlus8-Regular.ttf"))
+    if (!font.openFromFile("assets/fonts/8bitOperatorPlus8-Regular.ttf"))
     {
       std::cerr << "failed to load font from assets folder!\n";
     }
@@ -34,19 +37,25 @@ public:
     titleText.setString("Baccarat");
     titleText.setCharacterSize(120);
     titleText.setFillColor(sf::Color::White);
-    titleText.setPosition({600.0f, 200.0f}); // rough centering
+    UI::centerOrigin(titleText);
+    UI::placeInCenter(titleText);
     
     // set up the play button background
     playButton.setSize(sf::Vector2f({400.0f, 120.0f}));
     playButton.setFillColor(sf::Color(40, 150, 60)); //green button
-    playButton.setPosition({760.0f, 500.0f});
+    //call centerOrigin to center the origin so it calculates the center
+    UI::centerOrigin(playButton);
+    UI::placeCenteredX(playButton, 800.0f);
 
     //set up the play button text
     playButtonText.setFont(font);
     playButtonText.setString("Play");
     playButtonText.setCharacterSize(60);
     playButtonText.setFillColor(sf::Color::White);
-    playButtonText.setPosition({890.0f, 525.0f});
+    UI::centerOrigin(playButtonText);
+    UI::placeCenteredX(playButtonText, 800.0f);
+
+
   }
 
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override

@@ -2,6 +2,12 @@
 cmake_minimum_required(VERSION 3.28)
 project(CMakeSFMLProject LANGUAGES CXX)
 
+# this tells cmake to put a file called compile_commands.json 
+# that acts as a map for clangd lsp
+# (for neovim users using clangd)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # instead of downloading SFML, CMake reaches out to github and
@@ -22,9 +28,23 @@ FetchContent_MakeAvailable(SFML)
 # them here -------------------V
 add_executable(run 
   src/main.cpp
-  src/Screen.h
-  src/MainMenuScreen.h
-  src/GameScreen.h
+  src/Screens/Screen.h
+  src/Screens/MainMenuScreen.h
+  src/Screens/GameScreen.h
+
+  #headers
+  src/logic/card.h
+  src/logic/deck.h
+  src/logic/player.h
+  src/logic/baccarat_hand.h
+  src/logic/baccarat_table.h
+
+  #source files
+  src/logic/card.cpp
+  src/logic/deck.cpp
+  src/logic/player.cpp
+  src/logic/baccarat_hand.cpp
+  src/logic/baccarat_table.cpp
 
   # src/Card.cpp <- example
 )

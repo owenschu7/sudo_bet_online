@@ -1,0 +1,33 @@
+//implements the ability to play a round of baccarat and stores the data of all the previous games
+#ifndef BACCARAT_TABLE_H
+#define BACCARAT_TABLE_H
+
+#include <iostream>
+#include <vector>
+#include "card.h"
+#include "deck.h"
+#include "baccarat_hand.h"
+#include "baccarat_table.h"
+#include "player.h"
+#include "baccarat_defs.h"
+
+using namespace std;
+
+class Baccarat_table
+{
+public:
+  Baccarat_table();
+  ~Baccarat_table();
+
+  //plays a round returns who wins also it pushes the result to m_outcomes
+  Round_Record play_round(); // plays 1 round and returns a record of that round played
+ 
+  void print_history_of_round(int round);
+
+private:
+  Deck m_deck{8}; // 8 decks in a shoe
+  int m_cards_left;
+  vector<Round_Record> m_outcomes; // stores all the information about the game
+};
+
+#endif
