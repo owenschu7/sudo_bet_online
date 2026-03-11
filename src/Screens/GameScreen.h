@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
+#include <iostream>
 #include "../../UI/UIHelper.h"
 #include "../../UI/Button.h"
 
@@ -14,6 +15,10 @@ private:
 
   //things go here
   sf::RectangleShape tableBackground;
+  
+  sf::Font font;
+  //new buttons
+  std::unique_ptr<Button> dealButton;
 
   //betting zones (rectangles with text overlay)
   //these dont need pointers because they have default constructors
@@ -32,7 +37,6 @@ private:
   std::unique_ptr<sf::Text> dragonBetZoneLabel;
 
   //font
-  sf::Font font;
 
   //text
   std::unique_ptr<sf::Text> playerLabel;
@@ -42,10 +46,6 @@ private:
   sf::Texture cardBackTexture;
   //card vector to hold all 6 cards
   std::vector<std::unique_ptr<sf::Sprite>> cards;
-
-  //deal button
-  sf::RectangleShape dealButton;
-  std::unique_ptr<sf::Text> dealButtonLabel;
 
 public:
   GameScreen()
@@ -66,6 +66,13 @@ public:
     {
       std::cerr << "Failed to load card back image!\n";
     }
+
+    // build the deal button (Now that the font is safe to use)
+    // We use the original rectangle size of 400x150
+    dealButton = std::make_unique<Button>("DEAL", font, sf::Vector2f{400.0f, 150.0f});
+    UI::centerOrigin(dealButton);
+    UI::placeLeft(*dealButton, 860.0f); // Button is a Transformable, so UIHelper should position it easily
+    
     
     //time to build the objects using std::make_unique
     //player labels
@@ -144,20 +151,6 @@ public:
     UI::centerOrigin(*tieBetZoneLabel);
     UI::placeCenteredX(*tieBetZoneLabel, 630.0f);
 
-    //deal button
-    dealButtonLabel = std::make_unique<sf::Text>(font);
-    dealButtonLabel->setString("DEAL");
-    dealButtonLabel->setCharacterSize(80);
-    dealButtonLabel->setFillColor(sf::Color::Black);
-    UI::centerOrigin(*dealButtonLabel);
-    UI::placeLeft(*dealButtonLabel, 860.0f);
-    // deal button rectangle
-    dealButton.setSize({400.0f, 150.0f});
-    dealButton.setFillColor(sf::Color::White);
-    dealButton.setOutlineColor(sf::Color::Black);
-    dealButton.setOutlineThickness(5.0f);
-    UI::centerOrigin(dealButton);
-    UI::placeLeft(dealButton, 860.0f);
   }
 
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override
@@ -179,6 +172,7 @@ public:
 
   void draw(sf::RenderWindow& window) override
   {
+    window.draw(*dealButton);
     // draw play button, settings button, background
     window.draw(tableBackground);
 
@@ -196,9 +190,6 @@ public:
     window.draw(*playerLabel);
     window.draw(*bankerLabel);
 
-    //deal button drawing
-    window.draw(dealButton);
-    window.draw(*dealButtonLabel);
 
     //cards
     for (const std::unique_ptr<sf::Sprite>& card : cards)
