@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 // creates a dedicated toolbox named UI that you can open from anywhere in your game
-
+//
 namespace UI
 {
   // The virtual canvas size
@@ -17,18 +17,38 @@ namespace UI
     object.setOrigin({bounds.position.x + bounds.size.x / 2.0f, bounds.position.y + bounds.size.y / 2.0f});
   }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///center placement functions
+///
+
   // 2. Menu Anchors
   inline void placeInCenter(sf::Transformable &object)
   {
     object.setPosition({SCREEN_W / 2.0f, SCREEN_H / 2.0f});
   }
 
-  inline void placeCenteredX(sf::Transformable &object, float yPos)
+  inline void placeCentered(sf::Transformable &object, float yPos)
   {
     object.setPosition({SCREEN_W / 2.0f, yPos});
   }
 
-  // 3. Table Anchors (Restored for your text labels!)
+  // Offsets the center position to the LEFT by a specific number of pixels
+  inline void placeCenteredoffsetLeft(sf::Transformable &object, float yPos, float offsetPixels)
+  {
+    object.setPosition({(SCREEN_W / 2.0f) - offsetPixels, yPos});
+  }
+
+  // Offsets the center position to the RIGHT by a specific number of pixels
+  inline void placeCenteredoffsetRight(sf::Transformable &object, float yPos, float offsetPixels)
+  {
+    object.setPosition({(SCREEN_W / 2.0f) + offsetPixels, yPos});
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+///hand placement (where the cards sit)
+///
+
+  // Table Anchors 
   inline void placeAtPlayerHandX(sf::Transformable &object, float yPos)
   {
     object.setPosition({SCREEN_W * 0.35f, yPos});
@@ -39,7 +59,9 @@ namespace UI
     object.setPosition({SCREEN_W * 0.65f, yPos});
   }
 
-  // 4. Card Placement Logic
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///card placement logic
+///
   inline const float CARD_OFFSET_X = 160.0f;
 
   inline void placeCardInHand(sf::Sprite &sprite, float startX, float baseY, int cardIndex)
@@ -71,11 +93,15 @@ namespace UI
     }
   }
 
-  //
-  template <typename T>
-  inline void placeLeft(T &object, float yPos)
+  // Left/Right Anchors (Updated to use sf::Transformable)
+  inline void placeLeft(sf::Transformable &object, float yPos)
   {
-    object.setPosition({SCREEN_W * 0.80f, yPos});
+    object.setPosition({SCREEN_W * 0.20f, yPos}); // 20% of screen width
+  }
+
+  inline void placeRight(sf::Transformable &object, float yPos)
+  {
+    object.setPosition({SCREEN_W * 0.80f, yPos}); // 80% of screen width
   }
 
 }

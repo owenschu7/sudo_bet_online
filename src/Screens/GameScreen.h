@@ -4,8 +4,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-#include "../../UI/UIHelper.h"
-#include "../../UI/Button.h"
+#include "../UI/UIHelper.h"
 
 class GameScreen : public Screen
 {
@@ -15,51 +14,24 @@ private:
 
   //things go here
   sf::RectangleShape tableBackground;
-  
-  sf::Font font;
-  //new buttons
-  std::unique_ptr<Button> dealButton;
 
-  //betting zones (rectangles with text overlay)
-  //these dont need pointers because they have default constructors
-  sf::RectangleShape betZone;
-  sf::RectangleShape playerBetZone;
-  sf::RectangleShape bankerBetZone;
-  sf::RectangleShape tieBetZone;
-  sf::RectangleShape pandaBetZone;
-  sf::RectangleShape dragonBetZone;
-  //text for the bettingzones
-  //these need pointers
-  std::unique_ptr<sf::Text> playerBetZoneLabel;
-  std::unique_ptr<sf::Text> bankerBetZoneLabel;
-  std::unique_ptr<sf::Text> tieBetZoneLabel;
-  std::unique_ptr<sf::Text> pandaBetZoneLabel;
-  std::unique_ptr<sf::Text> dragonBetZoneLabel;
-
-  //font
-
-  //text
-  std::unique_ptr<sf::Text> playerLabel;
-  std::unique_ptr<sf::Text> bankerLabel;
-
-  //images
+  // for the back of the card texture
   sf::Texture cardBackTexture;
-  //card vector to hold all 6 cards
+
+  //holds all the cards being displayed
   std::vector<std::unique_ptr<sf::Sprite>> cards;
 
+  //outline to hold the buttons
+  sf::RectangleShape betZone;
+
+
 public:
-  GameScreen()
+  GameScreen(SharedData &sharedData) : Screen(sharedData)
   {
     //set up a green background
     tableBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
     tableBackground.setFillColor(sf::Color(35,107,43)); //casino green
 
-
-    //load the heavy assets first
-    if (!font.openFromFile("assets/fonts/8bitOperatorPlus8-Regular.ttf"))
-    {
-      std::cerr << "failed to load font from assets folder!\n";
-    }
 
     //load the image
     if (!cardBackTexture.loadFromFile("assets/images/Cards/card_back_blue.png"))
@@ -67,27 +39,6 @@ public:
       std::cerr << "Failed to load card back image!\n";
     }
 
-    // build the deal button (Now that the font is safe to use)
-    // We use the original rectangle size of 400x150
-    dealButton = std::make_unique<Button>("DEAL", font, sf::Vector2f{400.0f, 150.0f});
-    UI::centerOrigin(dealButton);
-    UI::placeLeft(*dealButton, 860.0f); // Button is a Transformable, so UIHelper should position it easily
-    
-    
-    //time to build the objects using std::make_unique
-    //player labels
-    playerLabel = std::make_unique<sf::Text>(font);
-    playerLabel->setString("PLAYER"); // use -> for pointers
-    playerLabel->setCharacterSize(120);
-    UI::centerOrigin(*playerLabel); // use * to pass the actual object
-    UI::placeAtPlayerHandX(*playerLabel, 100.0f);
-
-    //banker labels
-    bankerLabel = std::make_unique<sf::Text>(font);
-    bankerLabel->setString("BANKER");
-    bankerLabel->setCharacterSize(120);
-    UI::centerOrigin(*bankerLabel);
-    UI::placeAtBankerHandX(*bankerLabel, 100.0f);
 
     //cards
     for (int i = 0; i < 6; ++i) 
@@ -99,57 +50,15 @@ public:
     }
     UI::placeAllCards(cards, 300.0f);
 
-    // Betting Zone Outlines
+    // Big Betting Zone Outline (Now with a dark green background)
     betZone.setSize({500.0f, 500.0f});
-    betZone.setFillColor(sf::Color::Transparent);
+    // A nice dark casino green (RGB: 20, 80, 25)
+    betZone.setFillColor(sf::Color(20, 80, 25)); 
     betZone.setOutlineColor(sf::Color::Black);
     betZone.setOutlineThickness(5.0f);
     UI::centerOrigin(betZone);
-    UI::placeCenteredX(betZone, 800.0f);
+    UI::placeCentered(betZone, 800.0f);
 
-    playerBetZone.setSize({400.0f, 150.0f});
-    playerBetZone.setFillColor(sf::Color::Transparent);
-    playerBetZone.setOutlineColor(sf::Color::Black);
-    playerBetZone.setOutlineThickness(5.0f);
-    UI::centerOrigin(playerBetZone);
-    UI::placeCenteredX(playerBetZone, 780.0f); // Low on the screen
-
-    playerBetZoneLabel = std::make_unique<sf::Text>(font);
-    playerBetZoneLabel->setString("PLAYER");
-    playerBetZoneLabel->setCharacterSize(80);
-    playerBetZoneLabel->setFillColor(sf::Color(255, 255, 255, 150)); // Semi-transparent white
-    UI::centerOrigin(*playerBetZoneLabel);
-    UI::placeCenteredX(*playerBetZoneLabel, 780.0f);
-
-    // Banker Zone Outline
-    bankerBetZone.setSize({400.0f, 150.0f});
-    bankerBetZone.setFillColor(sf::Color::Transparent);
-    bankerBetZone.setOutlineColor(sf::Color::Black);
-    bankerBetZone.setOutlineThickness(5.0f);
-    UI::centerOrigin(bankerBetZone);
-    UI::placeCenteredX(bankerBetZone, 960.0f);
-
-    bankerBetZoneLabel = std::make_unique<sf::Text>(font);
-    bankerBetZoneLabel->setString("BANKER");
-    bankerBetZoneLabel->setCharacterSize(80);
-    bankerBetZoneLabel->setFillColor(sf::Color(255, 255, 255, 150));
-    UI::centerOrigin(*bankerBetZoneLabel);
-    UI::placeCenteredX(*bankerBetZoneLabel, 960.0f);
-
-    // Tie Zone Outline (Dead Center)
-    tieBetZone.setSize({120.0f, 100.0f});
-    tieBetZone.setFillColor(sf::Color::Transparent);
-    tieBetZone.setOutlineColor(sf::Color::Black);
-    tieBetZone.setOutlineThickness(5.0f);
-    UI::centerOrigin(tieBetZone);
-    UI::placeCenteredX(tieBetZone, 630.0f);
-
-    tieBetZoneLabel = std::make_unique<sf::Text>(font);
-    tieBetZoneLabel->setString("TIE");
-    tieBetZoneLabel->setCharacterSize(60);
-    tieBetZoneLabel->setFillColor(sf::Color(255, 215, 0, 150));
-    UI::centerOrigin(*tieBetZoneLabel);
-    UI::placeCenteredX(*tieBetZoneLabel, 630.0f);
 
   }
 
@@ -172,24 +81,11 @@ public:
 
   void draw(sf::RenderWindow& window) override
   {
-    window.draw(*dealButton);
     // draw play button, settings button, background
     window.draw(tableBackground);
 
-    // draw betting zone outlines
-    window.draw(betZone);
-    window.draw(playerBetZone);
-    window.draw(bankerBetZone);
-    window.draw(tieBetZone);
-
-    // draw labels (* dereferences pointers)
-    window.draw(*playerBetZoneLabel);
-    window.draw(*bankerBetZoneLabel);
-    window.draw(*tieBetZoneLabel);
-
-    window.draw(*playerLabel);
-    window.draw(*bankerLabel);
-
+    // Betting Zones
+    window.draw(betZone); // The main outline
 
     //cards
     for (const std::unique_ptr<sf::Sprite>& card : cards)

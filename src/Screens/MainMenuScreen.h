@@ -1,7 +1,6 @@
 #include "Screen.h"
-#include <iostream>
 #include <SFML/Graphics.hpp>
-#include "../../UI/UIHelper.h"
+#include <imgui.h>
 
 class MainMenuScreen : public Screen
 {
@@ -10,51 +9,104 @@ private:
   
   sf::RectangleShape menuBackground;
 
-  //declare the font and UI elements here
-  sf::Font font;
-  sf::Text titleText;
+  // --- UI HELPER METHODS ---
 
-  //play button
-  sf::RectangleShape playButton;
-  sf::Text playButtonText;
+  void drawServerStatus(ImVec2 screenSize)
+  {
+    ImFont* defaultFont = ImGui::GetIO().Fonts->Fonts[0];
+    ImGui::PushFont(defaultFont);
+
+    const char* statusString = "Status: Servers Offline";
+
+    ImVec2 statusSize = ImGui::CalcTextSize(statusString);
+    
+    float topRightPadding = 20.0f;
+    float statusX = screenSize.x - statusSize.x - topRightPadding;
+    float statusY = topRightPadding; 
+
+    ImGui::SetCursorPos(ImVec2(statusX, statusY));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.2f, 0.2f, 1.0f)); // Red
+    ImGui::Text("%s", statusString);
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+  }
+
+  void drawTitle(ImVec2 screenSize)
+  {
+    ImFont* titleFont = ImGui::GetIO().Fonts->Fonts[1];
+    ImGui::PushFont(titleFont);
+    const char* titleString = "Baccarat Online";
+    ImVec2 textSize = ImGui::CalcTextSize(titleString);
+
+    float textX = (screenSize.x - textSize.x) * 0.5f;
+    float textY = (screenSize.y - textSize.y) * 0.5f;
+
+    ImGui::SetCursorPos(ImVec2(textX, textY));
+    ImGui::Text("%s", titleString);
+    ImGui::PopFont();
+  }
+
+  void drawButtons(ImVec2 screenSize)
+  {
+    float buttonWidth = 600.0f;
+    float buttonHeight = 80.0f;
+    float leftPadding = 40.0f;
+    float centerY = screenSize.y * 0.60f; 
+
+    ImFont* smallFont = ImGui::GetIO().Fonts->Fonts[0];
+    ImGui::PushFont(smallFont);
+
+    // Move cursor for the first button
+    ImGui::SetCursorPosX(leftPadding);
+    ImGui::SetCursorPosY(centerY);
+
+    // Push Styles
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(40.0f/255.0f, 150.0f/255.0f, 60.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(60.0f/255.0f, 170.0f/255.0f, 80.0f/255.0f, 1.0f)); 
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(20.0f/255.0f, 130.0f/255.0f, 40.0f/255.0f, 1.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 30.0f)); // adds a space vertically
+
+    // 2. Pass ImVec2(0.0f, 0.0f) to make the button auto-size to the text width and height
+    // (If you still want them to be chunky 100px tall buttons, use ImVec2(0.0f, 100.0f) instead!)
+    if (ImGui::Button("Join A Table", ImVec2(0.0f, buttonHeight))) 
+    {
+        nextState = ScreenState::Tables;
+    }
+
+    ImGui::SetCursorPosX(leftPadding);
+    if (ImGui::Button("Settings", ImVec2(0.0f, buttonHeight))) 
+    {
+        nextState = ScreenState::Settings;
+    }
+
+    ImGui::SetCursorPosX(leftPadding);
+    if (ImGui::Button("Quit", ImVec2(0.0f, buttonHeight))) 
+    {
+        nextState = ScreenState::Quit;
+    }
+
+    // FIX: for developers only
+    ImGui::SetCursorPosX(leftPadding);
+    if (ImGui::Button("Demo", ImVec2(0.0f, buttonHeight))) 
+    {
+        nextState = ScreenState::Demo;
+    }
+
+    // Pop Styles
+    ImGui::PopStyleColor(3); 
+    ImGui::PopStyleVar(2);  
+    ImGui::PopFont();
+  }
+
 
 public:
 
-  MainMenuScreen() : titleText(font), playButtonText(font)
+  MainMenuScreen(SharedData &sharedData) : Screen(sharedData)
   {
     //set up a dark blue background for the menu
     menuBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
     menuBackground.setFillColor(sf::Color(20, 20, 50));
-
-    //load the font firectly from the file
-    if (!font.openFromFile("assets/fonts/8bitOperatorPlus8-Regular.ttf"))
-    {
-      std::cerr << "failed to load font from assets folder!\n";
-    }
-
-    //set up the title
-    titleText.setFont(font);
-    titleText.setString("Baccarat");
-    titleText.setCharacterSize(120);
-    titleText.setFillColor(sf::Color::White);
-    UI::centerOrigin(titleText);
-    UI::placeInCenter(titleText);
-    
-    // set up the play button background
-    playButton.setSize(sf::Vector2f({400.0f, 120.0f}));
-    playButton.setFillColor(sf::Color(40, 150, 60)); //green button
-    //call centerOrigin to center the origin so it calculates the center
-    UI::centerOrigin(playButton);
-    UI::placeCenteredX(playButton, 800.0f);
-
-    //set up the play button text
-    playButtonText.setFont(font);
-    playButtonText.setString("Play");
-    playButtonText.setCharacterSize(60);
-    playButtonText.setFillColor(sf::Color::White);
-    UI::centerOrigin(playButtonText);
-    UI::placeCenteredX(playButtonText, 800.0f);
-
 
   }
 
@@ -68,37 +120,35 @@ public:
         nextState = ScreenState::Game;
       }
     }
-
-    //handle mouse clicks
-    if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>())
-    {
-      if(mousePressed->button == sf::Mouse::Button::Left)
-      {
-        //convent the raw pixel coordinates to window corrdinates
-        sf::Vector2f mousePos = window.mapPixelToCoords(mousePressed->position);
-        
-        //check if those coordinates are inside the play button's rectangle
-        if (playButton.getGlobalBounds().contains(mousePos))
-        {
-          nextState = ScreenState::Game;
-        }
-      }
-    }
   }
 
   void update() override
   {
-    // menu animateon logic goes here
+    // 1. Setup the invisible full-screen window
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImVec2 screenSize = ImGui::GetIO().DisplaySize;
+    ImGui::SetNextWindowSize(screenSize);
+
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | 
+                                   ImGuiWindowFlags_NoResize | 
+                                   ImGuiWindowFlags_NoMove | 
+                                   ImGuiWindowFlags_NoBackground;
+
+    ImGui::Begin("Menu Layer", nullptr, windowFlags);
+
+    // 2. Call our neat little helper functions!
+    drawServerStatus(screenSize);
+    drawTitle(screenSize);
+    drawButtons(screenSize);
+
+    // 3. End the window
+    ImGui::End();
   }
 
   void draw(sf::RenderWindow& window) override
   {
     // draw play button, settings button, background
     window.draw(menuBackground);
-    window.draw(titleText);
-    window.draw(playButton);     // draw button background first
-    window.draw(playButtonText); // draw text on top of it
-
   }
   
   ScreenState getNextState() const override
