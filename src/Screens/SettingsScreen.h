@@ -57,14 +57,14 @@ private:
     ImGui::SameLine(rightSideStart);
     
     ImGui::Text("Low"); ImGui::SameLine();
-    if (ImGui::Checkbox("##low", &m_shared.videoLow)) { 
-        m_shared.videoHigh = !m_shared.videoLow; 
+    if (ImGui::Checkbox("##low", &m_shared.s_videoLow)) { 
+        m_shared.s_videoHigh = !m_shared.s_videoLow; 
     }
     
     ImGui::SameLine();
     ImGui::Text("High"); ImGui::SameLine();
-    if (ImGui::Checkbox("##high", &m_shared.videoHigh)) { 
-        m_shared.videoLow = !m_shared.videoHigh; 
+    if (ImGui::Checkbox("##high", &m_shared.s_videoHigh)) { 
+        m_shared.s_videoLow = !m_shared.s_videoHigh; 
     }
 
     // --- 2. Music Slider (using m_shared) ---
@@ -72,7 +72,7 @@ private:
     ImGui::Text("Music");
     ImGui::SameLine(rightSideStart);
     ImGui::PushItemWidth(400.0f);
-    ImGui::SliderFloat("##music", &m_shared.musicVolume, 0.0f, 1.0f, ""); 
+    ImGui::SliderFloat("##music", &m_shared.s_musicVolume, 0.0f, 1.0f, ""); 
     ImGui::PopItemWidth();
 
     // --- 3. Sound FX Slider (using m_shared) ---
@@ -80,7 +80,7 @@ private:
     ImGui::Text("Sound fx");
     ImGui::SameLine(rightSideStart);
     ImGui::PushItemWidth(400.0f);
-    ImGui::SliderFloat("##sfx", &m_shared.sfxVolume, 0.0f, 1.0f, "");
+    ImGui::SliderFloat("##sfx", &m_shared.s_sfxVolume, 0.0f, 1.0f, "");
     ImGui::PopItemWidth();
 
     // --- 4. Language Combo (using m_shared) ---
@@ -89,7 +89,7 @@ private:
     ImGui::SameLine(rightSideStart);
     const char* languages[] = { "English", "Spanish", "French" };
     ImGui::PushItemWidth(250.0f);
-    ImGui::Combo("##lang", &m_shared.currentLanguage, languages, IM_ARRAYSIZE(languages));
+    ImGui::Combo("##lang", &m_shared.s_currentLanguage, languages, IM_ARRAYSIZE(languages));
     ImGui::PopItemWidth();
 
     // --- 5. Back Button (To return to Menu) ---
@@ -148,7 +148,8 @@ public:
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | 
                                    ImGuiWindowFlags_NoResize | 
                                    ImGuiWindowFlags_NoMove | 
-                                   ImGuiWindowFlags_NoBackground;
+                                   ImGuiWindowFlags_NoBackground |
+                                   ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     ImGui::Begin("Settings Layer", nullptr, windowFlags);
     drawSettingsText(screenSize);

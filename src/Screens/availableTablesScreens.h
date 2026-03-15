@@ -170,8 +170,6 @@ private:
     ImGui::PopStyleColor(2);
   }
 
-  // FIX: remove this later when feature is finished
-  std::string selectedGame = "None";
 
   void DrawGameSelectionPopup()
   {
@@ -322,7 +320,8 @@ public:
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | 
                                    ImGuiWindowFlags_NoResize | 
                                    ImGuiWindowFlags_NoMove | 
-                                   ImGuiWindowFlags_NoBackground;
+                                   ImGuiWindowFlags_NoBackground |
+                                   ImGuiWindowFlags_NoBringToFrontOnFocus; // used so that demo window can display over the screen
 
     ImGui::Begin("Table Layer", nullptr, windowFlags);
     // 1. Define how much vertical space you need for the button + padding

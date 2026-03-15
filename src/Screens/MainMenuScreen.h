@@ -86,19 +86,75 @@ private:
         nextState = ScreenState::Quit;
     }
 
-    // NOTE: for developers only
-    ImGui::SetCursorPosX(leftPadding);
-    if (ImGui::Button("Demo", ImVec2(0.0f, buttonHeight))) 
-    {
-        nextState = ScreenState::Demo;
-    }
-
     // Pop Styles
     ImGui::PopStyleColor(3); 
     ImGui::PopStyleVar(2);  
     ImGui::PopFont();
   }
 
+  // Define the stages of your login process
+  // FIX: put this in a better spot
+  enum class AuthState {
+      CheckingFiles,   // Looking for player_data.json
+      NeedUsername,    // First time playing
+      MainMenu,        // Logged in (playing the game)
+      LinkingAccount   // User clicked the "Secure Account" button
+  };
+  AuthState s_currentAuthState = AuthState::NeedUsername;
+  char usernameBuf[32] = "";
+  std::string s_currentUsername = "";
+  std::string s_currentUUID = "";
+
+
+
+  void DrawUsernameSelectionModal()
+  {
+    //first we check which AuthState we are in to determine where to draw/update stuff goes
+    if (s_currentAuthState == AuthState::NeedUsername)
+    {
+
+      //draw the popup to get username info
+      // 2. Center the popup on the screen
+      ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+      ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+      // 1. Tell ImGui to actually open the modal!
+      // The string here MUST match the string in BeginPopupModal exactly.
+      ImGui::OpenPopup("WELCOME...");
+
+      // 3. Define the flags to make it static (no moving, no resizing, no collapsing)
+      ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | 
+        ImGuiWindowFlags_NoResize | 
+        ImGuiWindowFlags_AlwaysAutoResize | 
+        ImGuiWindowFlags_NoCollapse;
+
+      // 4. Begin the modal
+      if (ImGui::BeginPopupModal("WELCOME...", NULL, flags))
+      {
+        ImGui::Text("Please Enter a Username:");
+        ImGui::Separator();
+
+        ImGui::InputText("##username", usernameBuf, IM_ARRAYSIZE(usernameBuf));
+
+        if (ImGui::Button("Enter"))
+        {
+          if (strlen(usernameBuf) > 0) {
+            // 1. Generate UUID
+            // 2. Save UUID + usernameBuf to local JSON file
+            // 3. Update memory
+            s_currentUsername = usernameBuf;
+
+            // Move to the next screen!
+            s_currentAuthState = AuthState::MainMenu; 
+
+            ImGui::CloseCurrentPopup();
+          }
+        }
+        ImGui::EndPopup();
+      }
+    // if username is already set (do somthing)
+    }
+  }
 
 public:
 
@@ -107,7 +163,6 @@ public:
     //set up a dark blue background for the menu
     menuBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
     menuBackground.setFillColor(sf::Color(20, 20, 50));
-
   }
 
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override
@@ -132,14 +187,21 @@ public:
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | 
                                    ImGuiWindowFlags_NoResize | 
                                    ImGuiWindowFlags_NoMove | 
-                                   ImGuiWindowFlags_NoBackground;
+                                   ImGuiWindowFlags_NoBackground |
+                                   ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     ImGui::Begin("Menu Layer", nullptr, windowFlags);
 
-    // 2. Call our neat little helper functions!
+      // 2. Call our neat little helper functions!
     drawServerStatus(screenSize);
     drawTitle(screenSize);
     drawButtons(screenSize);
+
+    // will draw username based on 3 conditions 
+    // - new user (prompts for username, then stores it)
+    // - logged in (draws username in corner)
+    // - searching for username (looking in files/authenticating with servers)
+    DrawUsernameSelectionModal(); 
 
     // 3. End the window
     ImGui::End();

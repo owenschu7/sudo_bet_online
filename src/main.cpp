@@ -176,6 +176,31 @@ int main()
     //update and draw the active screen
     currentScreen->update();
 
+
+    // global debug overlay
+    // runs after the screen updates so it draws on top of everything!
+    //displays on top left corner
+    ImGui::SetNextWindowPos(ImVec2(10.0f, 10.0f));
+    // Make it an invisible floating window with no title bar or background
+    ImGuiWindowFlags overlayFlags = ImGuiWindowFlags_NoDecoration | 
+                                    ImGuiWindowFlags_NoBackground | 
+                                    ImGuiWindowFlags_AlwaysAutoResize | 
+                                    ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings;
+
+    ImGui::Begin("Global Debug", nullptr, overlayFlags);
+    
+    // Draw the checkbox and bind it directly to your SharedData boolean
+    ImGui::Checkbox("Show Demo", &sharedData.s_demoWindow);
+    
+    ImGui::End();
+
+    // 3. Draw the actual Demo Window if the checkbox is ticked!
+    if (sharedData.s_demoWindow)
+    {
+        ImGui::ShowDemoWindow(&sharedData.s_demoWindow);
+    }
+
     //SFML uses a technique called Double Buffering.
     // Imagine an artist painting on a canvas hidden bedind a curtain, and when they are done,
     // they swap, it with the canvas the aduience is currently looking at
