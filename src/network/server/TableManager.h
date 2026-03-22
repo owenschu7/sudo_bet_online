@@ -32,10 +32,10 @@ public:
     // The Global Tick: Called by ServerApplication ~10 times a second
     void updateAll();
 
+
     // ------------------------------------------------------------------
     // EVENT ROUTING
     // ------------------------------------------------------------------
-    
     // Takes an action from SessionManager and hands it to the specific table
     void routeEventToTable(int tableID, Player* player, const GameEvent& event);
 

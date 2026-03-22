@@ -5,7 +5,6 @@
 class SettingsScreen : public Screen
 {
 private:
-  ScreenState nextState = ScreenState::None;
   
   sf::RectangleShape menuBackground;
 
@@ -118,7 +117,7 @@ private:
     ImGui::SetCursorPosX(leftPadding);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.4f, 0.4f, 1.0f)); 
     if (ImGui::Button("Back to Menu", ImVec2(0.0f, backButtonHeight))) {
-        nextState = ScreenState::MainMenu;
+        m_nextState = ScreenState::MainMenu;
     }
 
     // Clean up
@@ -144,7 +143,7 @@ public:
       //pressing "Enter" signals we want to switch to the game state
       if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
       {
-        nextState = ScreenState::MainMenu;
+        m_nextState = ScreenState::MainMenu;
       }
     }
 
@@ -188,6 +187,6 @@ public:
   
   ScreenState getNextState() const override
   {
-    return nextState;
+    return m_nextState;
   }
 };

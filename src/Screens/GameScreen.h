@@ -10,7 +10,6 @@ class GameScreen : public Screen
 {
 private:
   //when we want to change screens (to main menu for example) we change this variable to say StreenState::MainMenu
-  ScreenState nextState = ScreenState::None;
 
   //things go here
   sf::RectangleShape tableBackground;
@@ -69,7 +68,7 @@ public:
       //pressing "escape" signals we want to switch to the main menu state
       if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
       {
-        nextState = ScreenState::MainMenu;
+        m_nextState = ScreenState::MainMenu;
       }
     }
   }
@@ -96,6 +95,6 @@ public:
   
   ScreenState getNextState() const override
   {
-    return nextState;
+    return m_nextState;
   }
 };

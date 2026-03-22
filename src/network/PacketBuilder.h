@@ -95,6 +95,7 @@ public:
   {
     if (str == NULL)
     {
+      append8('\0');
       return;
     }
     size_t length = strlen(str) + 1; // +1 for the null terminator

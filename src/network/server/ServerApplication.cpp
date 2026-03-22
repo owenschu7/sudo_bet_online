@@ -14,14 +14,16 @@
 
 #include "../../core/Debug.h"
 
-// Inside ServerApplication constructor
+// ServerApplication constructor has
+// - m_tableManager // to manage the tables
+// - m_sessionManager (to manage the session)
 ServerApplication::ServerApplication(const char* port) 
     : m_port(port), 
-      m_tableManager(), // 1. Initialize the TableManager first
-      m_sessionManager(
+      m_tableManager(), // Initialize the TableManager first
+      m_sessionManager( // Initialize the SessionManager class here
           [this](int fd, const GameEvent& event){ this->sendEventToClient(fd, event); }, 
           m_tableManager    // 2. Pass it as the second argument here!
-      )
+      ) // lambda function for sendEventToClient for when
 {
 }
 
@@ -33,7 +35,7 @@ ServerApplication::~ServerApplication()
 
 void ServerApplication::run()
 {
-  DEBUG_PRINT << "ServerApplication.cpp: run():\n";
+  DEBUG_PRINT << "  ServerApplication.cpp: run():\n";
   if (!setupServer())
   {
     std::cerr << "Failed to start server on port" << m_port << "\n";
@@ -54,18 +56,25 @@ void ServerApplication::run()
       break;
     }
 
+    // loop through the m_pollFds vector (struct of pollfds) which hold each of the clients
+    // this loop figures out what was sent through poll
     for (int i = m_pollFds.size() - 1; i >= 0; i--)
     {
-      if ((m_pollFds[i].revents & POLLIN) == 0)
+      // POLLIN: flag saying there is data waiting to be read IN to the server
+      if ((m_pollFds[i].revents & POLLIN) == 0) //revents checks what actually happened
       {
-        continue;
+        continue; // go to next loop iteration and skip everything below
       }
-      if (m_pollFds[i].fd == m_serverSocket)
+
+      if (m_pollFds[i].fd == m_serverSocket) // the server socket has info, this info means a player wants to connect
       {
+        //so we accept them here
         acceptNewClient();
       }
       else
       {
+        DEBUG_PRINT << "\n";
+        //if its not from the server, its a gameEvent so we handle that data using handleClientData() with the index
         handleClientData(i);
       }
     }
@@ -162,7 +171,7 @@ void ServerApplication::acceptNewClient()
   }
   else
   {
-    DEBUG_PRINT << "  got a connecton on FD: " << new_fd << std::endl;
+    DEBUG_PRINT << "  adding FD: " << new_fd << " to m_pollFds\n";
 
     pollfd client_pollfd;
     client_pollfd.fd = new_fd;
@@ -180,6 +189,8 @@ void ServerApplication::acceptNewClient()
 
 // reads raw bytes from a client and frames them into discrete packets.
 // pollIndex - The index of the client in the m_pollFds vector.
+// this function is called when poll() detects a gameEvent from a player has been sent into the server
+//
 void ServerApplication::handleClientData(size_t pollIndex) 
 {
   DEBUG_PRINT << "ServerApplication.cpp: handleClientData():\n";
@@ -247,8 +258,8 @@ void ServerApplication::handleClientData(size_t pollIndex)
 void ServerApplication::disconnectClient(size_t pollIndex) 
 {
   int client_fd = m_pollFds[pollIndex].fd;
-  DEBUG_PRINT << "ServerApplication.cpp: disconnectClient():\n";
-  DEBUG_PRINT << "  Client FD: " << client_fd << " disconnected." << "\n";
+  DEBUG_PRINT << "    ServerApplication.cpp: disconnectClient():\n";
+  DEBUG_PRINT << "      Client FD: " << client_fd << " disconnected." << "\n";
 
   m_sessionManager.onClientDisconnected(client_fd);
 
@@ -259,7 +270,7 @@ void ServerApplication::disconnectClient(size_t pollIndex)
 
 int ServerApplication::sendAll(int sockfd, const uint8_t *buf, size_t &len) 
 {
-  DEBUG_PRINT << "ServerApplication.cpp: sendAll():\n";
+  DEBUG_PRINT << "    ServerApplication.cpp: sendAll():\n";
   size_t total = 0;
   size_t bytes_left = len;
   ssize_t n = 0;

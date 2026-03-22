@@ -7,7 +7,6 @@
 class StartScreen : public Screen
 {
 private:
-  ScreenState nextState = ScreenState::None;
   
   sf::RectangleShape menuBackground;
 
@@ -66,13 +65,13 @@ private:
       //switch to a loading screen
       //connect to the server
       // switch to MainMenu
-      nextState = ScreenState::Loading;
+      m_nextState = ScreenState::Loading;
     }
 
     ImGui::SetCursorPosX(leftPadding);
     if (ImGui::Button("Quit", ImVec2(0.0f, buttonHeight))) 
     {
-      nextState = ScreenState::Quit;
+      m_nextState = ScreenState::Quit;
     }
 
     // Pop Styles
@@ -191,7 +190,7 @@ public:
       //pressing "Enter" signals we want to switch to the game state
       if (keyPressed->scancode == sf::Keyboard::Scancode::Enter)
       {
-        nextState = ScreenState::MainMenu;
+        m_nextState = ScreenState::MainMenu;
       }
     }
   }
@@ -229,6 +228,6 @@ public:
   
   ScreenState getNextState() const override
   {
-    return nextState;
+    return m_nextState;
   }
 };

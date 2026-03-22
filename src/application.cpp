@@ -6,7 +6,6 @@
 #include "uuid.h"
 
 #include "Screens/StartScreen.h"
-#include "Screens/LoadingScreen.h"
 #include "Screens/MainMenuScreen.h"
 #include "Screens/GameScreen.h"
 #include "Screens/SettingsScreen.h"
@@ -227,7 +226,7 @@ void Application::processNetwork()
     GameEvent newEvent = PacketParser::parse(rawPacket);
 
     // 2. ROUTE THE EVENT
-    // We just drop EVERYTHING into the Inbox. The active UI screen (like your LoadingScreen) 
+    // We just drop EVERYTHING into the Inbox. The active UI screen
     // will read this queue during its update() loop and change states if necessary!
     m_sharedData.s_inboundEvents.push(newEvent);
   }
@@ -336,8 +335,6 @@ void Application::handleScreenTransitions()
         m_currentScreen = std::make_unique<StartScreen>(m_sharedData); break;
       case ScreenState::MainMenu:
         m_currentScreen = std::make_unique<MainMenuScreen>(m_sharedData); break;
-      case ScreenState::Loading:
-        m_currentScreen = std::make_unique<LoadingScreen>(m_sharedData); break;
       case ScreenState::Settings:
         m_currentScreen = std::make_unique<SettingsScreen>(m_sharedData); break;
       case ScreenState::Tables:

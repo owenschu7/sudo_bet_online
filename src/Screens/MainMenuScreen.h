@@ -3,10 +3,11 @@
 #include <imgui.h>
 #include "../core/Debug.h"
 
+#include "../core/GameEvents.h"
+
 class MainMenuScreen : public Screen
 {
 private:
-  ScreenState nextState = ScreenState::None;
 
   sf::RectangleShape menuBackground;
 
@@ -47,7 +48,16 @@ private:
     // Define the strings to display
     // Using m_shared.s_isOnline which you update in your network loop
     const char* statusText = m_shared.s_isOnline ? "Status: Online" : "Status: Offline"; 
-    const char* usernameText = "Username: Guest"; // Change to m_shared.s_username.c_str() if you have one!
+
+    std::string currentUser;
+    const char* usernameText = "Current User: "; // Change to m_shared.s_username.c_str() if you have one!
+    if (m_shared.s_isLoggedIn == false)
+    {
+      currentUser = "Guest";
+    }
+    else {
+      currentUser = m_shared.s_currentUsername;
+    }
     
     ImVec4 statusColor = m_shared.s_isOnline ? ImVec4(0.2f, 1.0f, 0.2f, 1.0f) 
                                              : ImVec4(1.0f, 0.2f, 0.2f, 1.0f); 
@@ -75,8 +85,16 @@ private:
     ImGui::SetCursorPos(ImVec2(screenSize.x - btnWidth - margin, currentY));
     if (ImGui::Button("Login", ImVec2(btnWidth, 0)))
     {
+      
       // TODO: Handle Login button click
-      // send an SYS_Connect event to login to the server as a player
+      // send an USER_In event to login to the server as a player
+      GameEvent loginEvent;
+      loginEvent.type = EventType::USER_In;
+      loginEvent.senderUUID = m_shared.s_currentUUID;
+      loginEvent.senderUsername = m_shared.s_currentUsername;
+      //no payload for USER_In event
+      //send the event to outboundEvents
+      m_shared.s_outboundEvents.push(loginEvent);
     }
     ImGui::PopStyleColor();
   }
@@ -102,6 +120,7 @@ private:
 
   void drawButtons(ImVec2 screenSize)
   {
+    DEBUG_PRINT << "MainMenuScreen.h: drawButtons():";
     float buttonWidth = 600.0f;
     float buttonHeight = 80.0f;
     float leftPadding = 40.0f;
@@ -129,22 +148,24 @@ private:
       //create event
       GameEvent getAvailableTables;
       getAvailableTables.type = EventType::GET_AvailableTables;
-      DEBUG_PRINT << "MainMenuScreen.h: drawButtons(): sending getAvailableTables event\n";
+      getAvailableTables.senderUUID = m_shared.s_currentUUID;
+      getAvailableTables.senderUsername = m_shared.s_currentUsername;
       //send event
       m_shared.s_outboundEvents.push(getAvailableTables);
-      nextState = ScreenState::Tables;
+      DEBUG_PRINT << "  sending event\n";
+      m_nextState = ScreenState::Tables;
     }
 
     ImGui::SetCursorPosX(leftPadding);
     if (ImGui::Button("Settings", ImVec2(0.0f, buttonHeight))) 
     {
-      nextState = ScreenState::Settings;
+      m_nextState = ScreenState::Settings;
     }
 
     ImGui::SetCursorPosX(leftPadding);
     if (ImGui::Button("Quit", ImVec2(0.0f, buttonHeight))) 
     {
-      nextState = ScreenState::Quit;
+      m_nextState = ScreenState::Quit;
     }
 
     // Pop Styles
@@ -260,7 +281,7 @@ public:
       //pressing "Enter" signals we want to switch to the game state
       if (keyPressed->scancode == sf::Keyboard::Scancode::Enter)
       {
-        nextState = ScreenState::Game;
+        m_nextState = ScreenState::Game;
       }
     }
   }
@@ -303,6 +324,6 @@ public:
   
   ScreenState getNextState() const override
   {
-    return nextState;
+    return m_nextState;
   }
 };

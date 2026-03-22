@@ -66,7 +66,6 @@ set(CLIENT_SOURCES
   src/network/client/NetworkClient.cpp
   src/Screens/Screen.h
   src/Screens/StartScreen.h
-  src/Screens/LoadingScreen.h
   src/Screens/MainMenuScreen.h
   src/Screens/SettingsScreen.h
   src/Screens/availableTablesScreens.h
@@ -82,6 +81,7 @@ set(SERVER_SOURCES
   src/network/server/server.cpp
   src/network/server/ServerApplication.cpp
   src/network/server/TableManager.cpp
+  src/network/server/SessionManager.cpp
   src/network/server/player.cpp
   # If you create a GameServer.cpp class later, it goes here!
 )
