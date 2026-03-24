@@ -1,7 +1,7 @@
 
 <div align ="center">
-<pre>
 
+  
 ```
 ▐▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▌
 ▐                                                                                     ▌
@@ -16,7 +16,7 @@
 ▐                                                                       * online      ▌
 ▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▌
 ```
-</pre>
+
 </div>
 
 A multiplayer, client-server casino platform. The architecture allows a central server to manage multiple concurrent game tables, while clients can seamlessly connect, view available lobbies, and join active games in real-time.
