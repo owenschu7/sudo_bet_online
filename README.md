@@ -1,5 +1,25 @@
-# sudo bet online
-is a multiplayer, client-server casino platform. The architecture allows a central server to manage multiple concurrent game tables, while clients can seamlessly connect, view available lobbies, and join active games in real-time.
+
+<div align ="center">
+<pre>
+
+```
+▐▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▌
+▐                                                                                     ▌
+▐                               $$\                 $$\                  $$\          ▌
+▐                               $$ |                $$ |                 $$ |         ▌
+▐      $$$$$$$\ $$\   $$\  $$$$$$$ | $$$$$$\        $$$$$$$\   $$$$$$\ $$$$$$\        ▌
+▐     $$  _____|$$ |  $$ |$$  __$$ |$$  __$$\       $$  __$$\ $$  __$$\\_$$  _|       ▌
+▐     \$$$$$$\  $$ |  $$ |$$ /  $$ |$$ /  $$ |      $$ |  $$ |$$$$$$$$ | $$ |         ▌
+▐      \____$$\ $$ |  $$ |$$ |  $$ |$$ |  $$ |      $$ |  $$ |$$   ____| $$ |$$\      ▌
+▐     $$$$$$$  |\$$$$$$  |\$$$$$$$ |\$$$$$$  |      $$$$$$$  |\$$$$$$$\  \$$$$  |     ▌
+▐     \_______/  \______/  \_______| \______/       \_______/  \_______|  \____/      ▌
+▐                                                                       * online      ▌
+▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▌
+```
+</pre>
+</div>
+
+A multiplayer, client-server casino platform. The architecture allows a central server to manage multiple concurrent game tables, while clients can seamlessly connect, view available lobbies, and join active games in real-time.
 
 # Features
 - Real-Time Multiplayer: Built with raw sockets for fast, peer-to-peer style communication.
