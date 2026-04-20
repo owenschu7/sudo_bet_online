@@ -55,15 +55,11 @@ set(SHARED_SOURCES
   src/logic/baccarat/baccarat_table.cpp
   src/logic/card.cpp
   src/logic/deck.cpp
-  src/logic/baseTable.cpp
 )
 
 # CLIENT EXECUTABLE
 set(CLIENT_SOURCES
   src/main.cpp
-  src/application.cpp
-  src/core/SettingsManager.cpp
-  src/network/client/NetworkClient.cpp
   src/Screens/Screen.h
   src/Screens/StartScreen.h
   src/Screens/MainMenuScreen.h

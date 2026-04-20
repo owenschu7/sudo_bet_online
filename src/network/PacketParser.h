@@ -5,7 +5,6 @@
 #include <arpa/inet.h>
 #include <string>
 #include <vector>
-#include <iostream> //delete this later
 
 #include "../core/GameEvents.h" // Make sure to include this so it knows what a GameEvent is!
 

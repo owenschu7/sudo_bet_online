@@ -11,8 +11,8 @@ enum class AuthState
   LinkingAccount   // User clicked the "Secure Account" button
 };
 
-struct SharedData {
-
+struct SharedData
+{
   bool s_settingsChanged = false; //flag to update screen when changes occur (this should turn true when any change has been made, and false when we update the changes)
   
   bool s_isOnline = false;
@@ -33,7 +33,6 @@ struct SharedData {
   std::string s_currentUsername = "";
 
   bool s_demoWindow = false; // displays the demo window for debugging
-  
 
   //GAME EVENTS
   //when an event occurs such as login, join table, or ready up the screen creates a GameEvent object

@@ -104,7 +104,7 @@ private:
   {
     ImFont* titleFont = ImGui::GetIO().Fonts->Fonts[1];
     ImGui::PushFont(titleFont);
-    const char* titleString = "Baccarat Online";
+    const char* titleString = "Sudo Bet Online";
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
     ImVec2 textSize = ImGui::CalcTextSize(titleString);
 
