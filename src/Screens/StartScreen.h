@@ -1,7 +1,6 @@
 #include "Screen.h"
 #include <SFML/Graphics.hpp>
 #include <imgui.h>
-#include <iostream> // FIX: debug info
 #include "../core/Debug.h"
 
 class StartScreen : public Screen
@@ -66,7 +65,6 @@ private:
       m_shared.s_outboundEvents.push(connectEvent);
 
       //mainmenu will handle if connection success or not
-      //mainmenu will handle login requests
       m_nextState = ScreenState::MainMenu;
     }
 
@@ -179,6 +177,25 @@ public:
     menuBackground.setFillColor(sf::Color(20, 20, 50));
   }
 
+
+  //handle events that came in from server to the client
+//void onNetworkEvent(const GameEvent& event) override
+//{
+//  // Handle events specific only related to the screen
+//  switch (event.type)
+//  {
+//    case EventType::SYS_Connect_Success:
+//      DEBUG_PRINT << "SYS_Connect_Success\n";
+//      DEBUG_PRINT << event.senderUsername << " joined the server.\n";
+//      m_shared.s_isOnline = true;
+//      // Add them to your local ImGui player list
+//      break;
+//    default:
+//      break;
+//  }
+//}
+
+
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override
   {
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
@@ -193,6 +210,8 @@ public:
 
   void update() override
   {
+    processEventsFromServer();
+
     // 1. Setup the invisible full-screen window
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;

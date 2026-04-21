@@ -19,14 +19,14 @@
 #include "network/client/NetworkClient.h"
 #include "network/PacketParser.h"
 
-#include "uuid.h"
+#include "core/uuid.h"
 #include "core/Debug.h"
 
 
-class Application
+class clientApplication
 {
 public:
-  Application() : m_settings("data/settings.txt")
+  clientApplication() : m_settings("data/settings.txt")
   {
     initWindow();
     initImGui();
@@ -38,7 +38,7 @@ public:
     m_currentScreen = std::make_unique<StartScreen>(m_sharedData);
   }
 
-  ~Application()
+  ~clientApplication()
   {
     // Clean up resources when the window is finally closed
     ImGui::SFML::Shutdown();
@@ -81,6 +81,7 @@ private:
       std::cerr << "Initialization failed! We can't safely use ImGui.\n";
       exit(-1);
     }
+
   }
 
   void initData()
@@ -208,44 +209,42 @@ private:
   //network
   void processNetwork()
   {
-    // We drain the Outbox completely every frame. The UI screens drop 
-    // GameEvents in here, and this function physically sends them over TCP.
+    /*======================================================================
+     * OUTBOUND EVENTS 
+     * all events in the outbound queue gets sent to server
+     *======================================================================*/
     while (!m_sharedData.s_outboundEvents.empty())
     {
       DEBUG_PRINT << "application.cpp: processNetwork():\n";
-      // Grab the oldest letter from the front of the queue
       GameEvent event = m_sharedData.s_outboundEvents.front();
       m_sharedData.s_outboundEvents.pop();
 
-      // if the packet is a sys_connect we dont send a packet, instead we call connectToServer()
+      /*================================================================
+      * SYSTEM EVENTS
+      * if the packet is a sys_connect we dont send a packet, instead we call connectToServer()
+      ================================================================*/
       if (event.type == EventType::SYS_Connect)
       {
         DEBUG_PRINT << "sys_connect detected\n";
         m_network.connectToServer("127.0.0.1", "8080");
       }
 
+      /*================================================================
+      * GAME EVENTS (Bets, Chat, Movement)
+      * These need to be packed into binary and shipped across the internet.
+      ================================================================*/
+      DEBUG_PRINT << "\nSENDING EVENT: " << event <<"\n";
 
-      //CLIENT -> SERVER
-      // --- GAME EVENTS (Bets, Chat, Movement) ---
-      // These need to be packed into binary and shipped across the internet.
-      DEBUG_PRINT << "sending event: " << event <<"\n";
-
-      // 1. Initialize the PacketBuilder to crush the struct into binary
       PacketBuilder packet;
-
-      // 2. Pack the data in a strict, predictable order
       packet.append8(static_cast<uint8_t>(event.type)); // OpCode (1 byte)
       packet.appendString(event.senderUUID.c_str());    // UUID (Dynamic length + Null term)
       packet.appendString(event.senderUsername.c_str()); // Username + Null term
       packet.append32(event.intPayload);                // Int (4 bytes, Network Byte Order)
       packet.appendString(event.stringPayload.c_str()); // String (Dynamic length + Null term)
-
-      // 3. Finalize: Calculates total size and prepends the 2-byte length header
       packet.finalize();
 
       const uint8_t* rawData = packet.getPtr();
       size_t totalSize = packet.getSize();
-
       DEBUG_PRINT << "[PACKET DUMP]\n"
         << "Size: " << totalSize << " bytes\n"
         << "Data: ";
@@ -256,31 +255,27 @@ private:
       }
       DEBUG_PRINT << "\n";
 
-      // 4. Hand the raw memory block to the NetworkClient to push to the OS buffer
       m_network.sendPacket(packet);
     }
 
-
-    //SERVER -> CLIENT
-    // inbound events from Server to Client
+    /*======================================================================
+     * INBOUND EVENTS
+     * SERVER -> CLIENT
+     * these events go directly into s_inboundEvents to be processed by the screens
+     *======================================================================*/
     std::vector<uint8_t> rawPacket;
 
-    // pollPacket() safely locks the thread mutex, grabs a packet if one exists, 
-    // puts it into 'rawPacket', and returns true. If empty, it returns false.
+    // grab a packet if there is one
     while (m_network.pollPacket(rawPacket))
     {
-      // 1. THE TRANSLATOR
       GameEvent newEvent = PacketParser::parse(rawPacket);
-
-      // 2. ROUTE THE EVENT
-      // We just drop EVERYTHING into the Inbox. The active UI screen
-      // will read this queue during its update() loop and change states if necessary!
+      DEBUG_PRINT << "\nNEW EVENT RECIEVED: " << EventTypeToString(newEvent.type) << "\n";
       m_sharedData.s_inboundEvents.push(newEvent);
     }
   }
 
   //game state and UI helpers
-  void handleScreenTransitions() 
+  void handleScreenTransitions()
   {
     //state switching logic
     // on every single frame, the manager asks the active screen
@@ -339,12 +334,45 @@ private:
 
     // Draw the checkbox and bind it directly to your SharedData bool
     ImGui::Checkbox("Show Demo", &m_sharedData.s_demoWindow);
+    ImGui::Checkbox("Debug", &m_sharedData.s_debugMode);
     ImGui::End();
 
     // draw the actual demo window if the checkbox is ticked
     if (m_sharedData.s_demoWindow)
     {
       ImGui::ShowDemoWindow(&m_sharedData.s_demoWindow);
+    }
+
+    // New Developer Tools window
+    if (m_sharedData.s_debugMode)
+    {
+      ImGui::Begin("Developer Tools", &m_sharedData.s_debugMode);
+      
+      if (ImGui::CollapsingHeader("Network Stats", ImGuiTreeNodeFlags_DefaultOpen))
+      {
+        ImGui::Text("Inbound Events: %zu", m_sharedData.s_inboundEvents.size());
+        ImGui::Text("Outbound Events: %zu", m_sharedData.s_outboundEvents.size());
+        ImGui::Text("Online: %s", m_sharedData.s_isOnline ? "Yes" : "No");
+      }
+
+      ImGui::Separator();
+
+      if (ImGui::CollapsingHeader("Game State"))
+      {
+        ImGui::Text("Current Screen: [Placeholder]");
+        ImGui::Text("Auth State: %d", (int)m_sharedData.s_AuthState);
+      }
+
+      ImGui::Separator();
+
+      if (ImGui::CollapsingHeader("Cheats / Tools"))
+      {
+        if (ImGui::Button("Simulate Event")) { /* Logic goes here */ }
+        ImGui::SameLine();
+        if (ImGui::Button("Clear Queues")) { /* Logic goes here */ }
+      }
+
+      ImGui::End();
     }
   }
 

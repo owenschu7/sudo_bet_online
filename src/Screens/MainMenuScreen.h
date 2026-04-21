@@ -50,14 +50,7 @@ private:
     const char* statusText = m_shared.s_isOnline ? "Status: Online" : "Status: Offline"; 
 
     std::string currentUser;
-    const char* usernameText = "Current User: "; // Change to m_shared.s_username.c_str() if you have one!
-    if (m_shared.s_isLoggedIn == false)
-    {
-      currentUser = "Guest";
-    }
-    else {
-      currentUser = m_shared.s_currentUsername;
-    }
+    std::string usernameText = "Current User: " + m_shared.s_currentUsername; // Change to m_shared.s_username.c_str() if you have one!
     
     ImVec4 statusColor = m_shared.s_isOnline ? ImVec4(0.2f, 1.0f, 0.2f, 1.0f) 
                                              : ImVec4(1.0f, 0.2f, 0.2f, 1.0f); 
@@ -75,27 +68,11 @@ private:
     currentY += statusSize.y + 5.0f; // Move down for the next element
 
     // 2. Draw Username (Below Status)
-    ImVec2 userSize = ImGui::CalcTextSize(usernameText);
+    ImVec2 userSize = ImGui::CalcTextSize(usernameText.c_str());
     ImGui::SetCursorPos(ImVec2(screenSize.x - userSize.x - margin, currentY));
-    ImGui::Text("%s", usernameText);
+    ImGui::Text("%s", usernameText.c_str());
     currentY += userSize.y + 10.0f; // Move down and add a little extra padding for the button
 
-    // 3. Draw Login Button (Below Username)
-    float btnWidth = 100.0f;
-    ImGui::SetCursorPos(ImVec2(screenSize.x - btnWidth - margin, currentY));
-    if (ImGui::Button("Login", ImVec2(btnWidth, 0)))
-    {
-      
-      // TODO: Handle Login button click
-      // send an USER_In event to login to the server as a player
-      GameEvent loginEvent;
-      loginEvent.type = EventType::USER_In;
-      loginEvent.senderUUID = m_shared.s_currentUUID;
-      loginEvent.senderUsername = m_shared.s_currentUsername;
-      //no payload for USER_In event
-      //send the event to outboundEvents
-      m_shared.s_outboundEvents.push(loginEvent);
-    }
     ImGui::PopStyleColor();
   }
 
@@ -265,12 +242,28 @@ private:
   }
 
 public:
-
   MainMenuScreen(SharedData &sharedData) : Screen(sharedData)
   {
     //set up a dark blue background for the menu
     menuBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
     menuBackground.setFillColor(sf::Color(20, 20, 50));
+  }
+
+  //handle events that came in from server to the client
+  void onNetworkEvent(const GameEvent& event) override
+  {
+    // Handle events specific only related to the screen
+    switch (event.type)
+    {
+      case EventType::SYS_Connect_Success:
+        DEBUG_PRINT << "SYS_Connect_Success\n";
+        DEBUG_PRINT << event.senderUsername << " joined the server.\n";
+        m_shared.s_isOnline = true;
+        // Add them to your local ImGui player list
+        break;
+      default:
+        break;
+    }
   }
 
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override
@@ -287,6 +280,9 @@ public:
 
   void update() override
   {
+    //check for events sent from the server to the client
+    processEventsFromServer();
+
     // 1. Setup the invisible full-screen window
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
@@ -300,7 +296,7 @@ public:
 
     ImGui::Begin("Menu Layer", nullptr, windowFlags);
 
-      // 2. Call our neat little helper functions!
+    // 2. Call our neat little helper functions!
     drawServerStatus(screenSize);
     drawTitle(screenSize);
     drawButtons(screenSize);

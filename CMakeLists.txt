@@ -59,27 +59,22 @@ set(SHARED_SOURCES
 
 # CLIENT EXECUTABLE
 set(CLIENT_SOURCES
-  src/main.cpp
+  src/client.cpp
   src/Screens/Screen.h
   src/Screens/StartScreen.h
   src/Screens/MainMenuScreen.h
   src/Screens/SettingsScreen.h
   src/Screens/availableTablesScreens.h
   src/Screens/demoScreen.h
-  # ... add the rest of your .cpp screens here ...
+  # add the rest of your .cpp screens here
 )
 
 add_executable(client ${CLIENT_SOURCES} ${SHARED_SOURCES})
 
-
 # SERVER EXECUTABLE
 set(SERVER_SOURCES
   src/network/server/server.cpp
-  src/network/server/ServerApplication.cpp
-  src/network/server/TableManager.cpp
-  src/network/server/SessionManager.cpp
-  src/network/server/player.cpp
-  # If you create a GameServer.cpp class later, it goes here!
+  # If you create a .cpp class later, it goes here!
 )
 
 add_executable(server ${SERVER_SOURCES} ${SHARED_SOURCES})

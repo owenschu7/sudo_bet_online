@@ -102,7 +102,7 @@ public:
   }
 
   //thread-safe way for the main loop (application) to grab received packets
-  //returns true if a packet was popper from the queue, false if empty
+  //returns true if a packet was popped from the queue, false if empty
   bool pollPacket(std::vector<uint8_t>& outPacket)
   {
     std::lock_guard<std::mutex> lock(m_queueMutex); // modern, safer alternative to .lock() / .unlock()
@@ -131,7 +131,7 @@ private:
   //background thread function
   void listenLoop() 
   {
-    uint8_t temp_buffer[4096]; // Fast stack memory for raw reads
+    uint8_t temp_buffer[1024]; // Fast stack memory for raw reads
     std::vector<uint8_t> persistent_buffer; // Heap memory to hold partial packets
 
     while (m_connected) {
@@ -147,23 +147,23 @@ private:
       persistent_buffer.insert(persistent_buffer.end(), temp_buffer, temp_buffer + bytes_received);
 
       // 2. Try to extract complete packets from the persistent buffer
-      // We assume the first 4 bytes of ANY packet is a uint32_t telling us the TOTAL packet size
-      while (persistent_buffer.size() >= 4) {
+      // We assume the first 2 bytes of ANY packet is a uint16_t telling us the TOTAL packet size
+      while (persistent_buffer.size() >= 2) {
 
-        // Extract the 4-byte header
-        uint32_t net_size;
-        std::memcpy(&net_size, persistent_buffer.data(), 4);
+        // Extract the 2-byte header
+        uint16_t net_size;
+        std::memcpy(&net_size, persistent_buffer.data(), 2);
 
         // Convert from network byte order to host byte order
-        uint32_t total_packet_size = ntohl(net_size);
+        uint16_t total_packet_size = ntohs(net_size) + 2;
 
         // Do we have all the bytes for this packet yet?
         if (persistent_buffer.size() >= total_packet_size) {
 
           // We have a full packet! Slice it out into a new vector.
-          // (We skip the first 4 bytes because we don't need the size header anymore)
+          // (We skip the first 2 bytes because we don't need the size header anymore)
           std::vector<uint8_t> complete_packet(
-            persistent_buffer.begin() + 4, 
+            persistent_buffer.begin() + 2,
             persistent_buffer.begin() + total_packet_size
           );
 

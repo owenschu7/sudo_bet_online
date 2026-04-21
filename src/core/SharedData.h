@@ -33,15 +33,16 @@ struct SharedData
   std::string s_currentUsername = "";
 
   bool s_demoWindow = false; // displays the demo window for debugging
+  bool s_debugMode = false; // displays additional debug info in the UI
 
   //GAME EVENTS
   //when an event occurs such as login, join table, or ready up the screen creates a GameEvent object
   // then pushes that GameEvent object onto the m_sharedData.s_outboundEvents queue which will
 
-  // OUTBOX: Screens put events here. The Application reads them and sends them to the server.
+  // OUTBOX: Screens put events here. The clientApplication reads them and sends them to the server.
   std::queue<GameEvent> s_outboundEvents; 
 
-  // INBOX: Application receives packets, turns them into events, and puts them here for screens to read.
+  // INBOX: clientApplication receives packets, turns them into events, and puts them here for screens to read.
   std::queue<GameEvent> s_inboundEvents;
 };
 

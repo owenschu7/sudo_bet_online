@@ -12,6 +12,11 @@ enum class EventType
   SYS_Connect_Failed,
 
 
+  //C2S = client to server
+  //S2C = server to client
+  C2S_JOINSERVER,
+  S2C_JOINSERVER_SUCCESS,
+
 
   //login events
   //USER_In - sends a login request to the server to check if the player exists
