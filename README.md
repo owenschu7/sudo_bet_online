@@ -43,7 +43,7 @@ To build and run sudo bet online, you will need the following installed on your 
 Clone the repository and compile both the client and server using CMake:
 Bash
 
-    git clone https://github.com/yourusername/sudo-bet-online.git
+    git clone https://github.com/owenschu7/sudo_bet_online.git
     cd sudo-bet-online
     cmake -B build
     cmake --build build
@@ -58,8 +58,7 @@ Launch one or more instances of the client
 
 
 # Roadmap
-- Switch server architecture to asio c++ network library
-- Implement login capabilites
+- finish game ui
 - Add customizable screen layout with presents
 
 # Contributing
