@@ -44,7 +44,7 @@ Clone the repository and compile both the client and server using CMake:
 Bash
 
     git clone https://github.com/owenschu7/sudo_bet_online.git
-    cd sudo-bet-online
+    cd sudo_bet_online
     cmake -B build
     cmake --build build
 # Usage
