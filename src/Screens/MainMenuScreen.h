@@ -122,13 +122,13 @@ private:
     if (ImGui::Button("Join A Table", ImVec2(0.0f, buttonHeight))) 
     {
       //create event
-      GameEvent getAvailableTables;
-      getAvailableTables.type = EventType::GET_AvailableTables;
-      getAvailableTables.senderUUID = m_shared.s_currentUUID;
-      getAvailableTables.senderUsername = m_shared.s_currentUsername;
+      GameEvent event;
+      event.type = EventType::GET_AvailableTables;
+      event.senderUUID = m_shared.s_currentUUID;
+      event.senderUsername = m_shared.s_currentUsername;
       //send event
-      m_shared.s_outboundEvents.push(getAvailableTables);
-      DEBUG_PRINT << "  sending event\n";
+      m_shared.s_outboundEvents.push(event);
+      DEBUG_PRINT << "SENDING EVENT: " << event << "\n";
       m_nextState = ScreenState::Tables;
     }
 
@@ -149,10 +149,6 @@ private:
     ImGui::PopStyleVar(2);  
     ImGui::PopFont();
   }
-
-
-
-
 
   void DrawUsername(ImVec2 screenSize)
   {
@@ -259,6 +255,12 @@ public:
         DEBUG_PRINT << "SYS_Connect_Success\n";
         DEBUG_PRINT << event.senderUsername << " joined the server.\n";
         m_shared.s_isOnline = true;
+        // Add them to your local ImGui player list
+        break;
+      case EventType::GET_AvailableTables:
+        DEBUG_PRINT << "GET_AvailableTables\n";
+        DEBUG_PRINT << "payload:" << event.stringPayload << "\n";
+        //add the tables to the screen
         // Add them to your local ImGui player list
         break;
       default:

@@ -6,21 +6,21 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 
-#include "core/SharedData.h"
-#include "core/SettingsManager.h"
-#include "Screens/Screen.h"
-#include "Screens/StartScreen.h"
-#include "Screens/MainMenuScreen.h"
-#include "Screens/GameScreen.h"
-#include "Screens/SettingsScreen.h"
-#include "Screens/demoScreen.h"
-#include "Screens/availableTablesScreens.h"
+#include "../../core/SharedData.h"
+#include "../../core/SettingsManager.h"
+#include "../../Screens/Screen.h"
+#include "../../Screens/StartScreen.h"
+#include "../../Screens/MainMenuScreen.h"
+#include "../../Screens/GameScreen.h"
+#include "../../Screens/SettingsScreen.h"
+#include "../../Screens/demoScreen.h"
+#include "../../Screens/availableTablesScreens.h"
 
-#include "network/client/NetworkClient.h"
-#include "network/PacketParser.h"
+#include "../../network/client/NetworkClient.h"
+#include "../../network/PacketParser.h"
 
-#include "core/uuid.h"
-#include "core/Debug.h"
+#include "../../core/uuid.h"
+#include "../../core/Debug.h"
 
 
 class clientApplication

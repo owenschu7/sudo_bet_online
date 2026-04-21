@@ -1,4 +1,4 @@
-#include "clientApplication.h"
+#include "network/client/clientApplication.h"
 
 int main()
 {

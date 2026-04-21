@@ -1,6 +1,4 @@
-#include "ServerApplication.h"
-
-#include "../../core/Debug.h"
+#include "network/server/ServerApplication.h"
 
 int main() 
 {
