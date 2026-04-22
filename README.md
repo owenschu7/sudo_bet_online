@@ -28,8 +28,8 @@ A multiplayer, client-server casino platform. The architecture allows a central 
 
 # Architecture Overview
 The project is split into two primary components
-- The Server: Written in C++, handling all socket connections, threading for multiple tables, and the core game logic. It acts as the single source of truth to prevent client-side manipulation.
-- The (Client): A powerful C++ application that establishes a TCP connection to the server, renders the game state using SFML/ImGui, and handles user input to send back across the network.
+- The Server: Written in C++, handling all socket connections, multiple tables, and the core game logic. It acts as the single source of truth to prevent client-side manipulation.
+- The Client: A powerful C++ application that establishes a TCP connection to the server, renders the game state using SFML/ImGui, and handles user input to send and recieve across the network.
 
 # Prerequisites
 
@@ -53,13 +53,14 @@ Navigate into the build folder we just created and run the server executable
     ./server
 
 2. Connect the client
-Launch one or more instances of the client
+Launch one or more instances of the client from another terminal window
     ./client
 
 
 # Roadmap
 - finish game ui
-- Add customizable screen layout with presents
+- finish table and session tracking on server
+- Add customizable screen layout with presents using imgui
 
 # Contributing
 Feel free to contribute
