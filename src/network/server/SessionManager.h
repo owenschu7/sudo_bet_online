@@ -25,7 +25,7 @@
 #include <functional>
 
 #include "../../core/GameEvents.h"
-#include "player.h"
+#include "../../core/player.h"
 #include "TableManager.h" 
 #include <iostream>
 #include "../../core/Debug.h"

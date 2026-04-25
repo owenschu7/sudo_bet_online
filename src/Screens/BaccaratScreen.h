@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
+#include "../core/player.h"
 
 class BaccaratScreen : public Screen
 {
@@ -18,6 +19,9 @@ private:
   sf::RectangleShape playerBetZone;
   sf::RectangleShape tieBetZone;
   sf::RectangleShape bankerBetZone;
+
+  // Vector to hold our current players
+  std::vector<Player> currentPlayers;
 
 public:
   BaccaratScreen(SharedData &sharedData) : Screen(sharedData)

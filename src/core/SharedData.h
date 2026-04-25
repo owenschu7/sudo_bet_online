@@ -3,14 +3,6 @@
 #include <queue>
 #include "GameEvents.h"
 
-enum class AuthState
-{
-  CheckingFiles,   // Looking for player_data.json
-  NeedUsername,    // First time playing
-  LoggedIn,        // Logged in (playing the game)
-  LinkingAccount   // User clicked the "Secure Account" button
-};
-
 struct SharedData
 {
   bool s_settingsChanged = false; //flag to update screen when changes occur (this should turn true when any change has been made, and false when we update the changes)
@@ -27,8 +19,7 @@ struct SharedData
 
   bool s_lightMode = false; // true for lightmode false for dark mode
 
-  // authentication data
-  AuthState s_AuthState = AuthState::CheckingFiles;
+  bool s_needUsername;
   std::string s_currentUUID = "";
   std::string s_currentUsername = "";
 

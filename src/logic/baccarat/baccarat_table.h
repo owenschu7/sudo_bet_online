@@ -4,7 +4,6 @@
 
 #include <vector>
 #include "../deck.h"
-#include "../../network/server/player.h"
 #include "baccarat_defs.h"
 #include "../baseTable.h"
 

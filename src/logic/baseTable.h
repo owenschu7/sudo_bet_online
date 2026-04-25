@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include "../core/GameEvents.h" 
-#include "../network/server/player.h"
+#include "../core/player.h"
 
 enum class TableState {
   WAITING_FOR_PLAYERS,

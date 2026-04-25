@@ -95,11 +95,11 @@ private:
       m_sharedData.s_currentUUID = generateRealUUID();
       // Save the new UUID immediately so it persists next time
       m_settings.Save(m_sharedData);
-      m_sharedData.s_AuthState = AuthState::NeedUsername;
+      m_sharedData.s_needUsername = true;
     }
     else
     {
-      m_sharedData.s_AuthState = AuthState::LoggedIn;
+      m_sharedData.s_needUsername = false;
     }
 
     //force an update to load session settings
@@ -351,8 +351,7 @@ private:
 
       if (ImGui::CollapsingHeader("Game State"))
       {
-        ImGui::Text("Current Screen: [Placeholder]");
-        ImGui::Text("Auth State: %d", (int)m_sharedData.s_AuthState);
+        ImGui::Text("things can go here");
       }
 
       ImGui::Separator();

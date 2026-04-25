@@ -18,7 +18,7 @@
 #include "../../logic/baseTable.h"
 #include "../../logic/baccarat/baccarat_table.h"
 
-#include "player.h"
+#include "../../core/player.h"
 
 // If you add Poker or Blackjack later, include them here!
 

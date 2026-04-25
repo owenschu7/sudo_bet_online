@@ -85,87 +85,77 @@ private:
   void DrawUsername(ImVec2 screenSize)
   {
     static char usernameBuf[32] = "";
-    //first we check which AuthState we are in to determine where to draw/update stuff goes
 
-    switch (m_shared.s_AuthState)
+    if (m_shared.s_needUsername)
     {
-      case AuthState::NeedUsername:
+      //center the modal to the center of the screen
+
+      float centerX = (screenSize.x / 2.0f);
+      float centerY = (screenSize.y / 2.0f);
+
+      //draw the popup to get username info
+      // center the popup on the screen
+      // to do this we use SetNextWindowPos(), it sets the next location to draw a window at 
+      // (in our case its the popup and we want it in the center of the screen)
+      ImGui::SetNextWindowPos(ImVec2(centerX, centerY), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+      // 1. Tell ImGui to actually open the modal!
+      // The string here MUST match the string in BeginPopupModal exactly.
+      ImGui::OpenPopup("WELCOME...");
+
+      // 3. Define the flags to make it static (no moving, no resizing, no collapsing)
+      ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | 
+        ImGuiWindowFlags_NoResize | 
+        ImGuiWindowFlags_AlwaysAutoResize | 
+        ImGuiWindowFlags_NoCollapse;
+
+      // 4. Begin the modal
+      if (ImGui::BeginPopupModal("WELCOME...", NULL, flags))
+      {
+        ImGui::Text("Please Enter a Username:");
+        ImGui::Separator();
+
+        ImGui::InputText("##username", usernameBuf, IM_ARRAYSIZE(usernameBuf));
+
+        if (ImGui::Button("Enter"))
         {
-          //center the modal to the center of the screen
+          m_shared.s_currentUsername = usernameBuf;
+          m_shared.s_settingsChanged = true;
 
-          float centerX = (screenSize.x / 2.0f);
-          float centerY = (screenSize.y / 2.0f);
+          // Move to the next screen!
+          m_shared.s_needUsername = false;
 
-          //draw the popup to get username info
-          // center the popup on the screen
-          // to do this we use SetNextWindowPos(), it sets the next location to draw a window at 
-          // (in our case its the popup and we want it in the center of the screen)
-          ImGui::SetNextWindowPos(ImVec2(centerX, centerY), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-
-          // 1. Tell ImGui to actually open the modal!
-          // The string here MUST match the string in BeginPopupModal exactly.
-          ImGui::OpenPopup("WELCOME...");
-
-          // 3. Define the flags to make it static (no moving, no resizing, no collapsing)
-          ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | 
-            ImGuiWindowFlags_NoResize | 
-            ImGuiWindowFlags_AlwaysAutoResize | 
-            ImGuiWindowFlags_NoCollapse;
-
-          // 4. Begin the modal
-          if (ImGui::BeginPopupModal("WELCOME...", NULL, flags))
-          {
-            ImGui::Text("Please Enter a Username:");
-            ImGui::Separator();
-
-            ImGui::InputText("##username", usernameBuf, IM_ARRAYSIZE(usernameBuf));
-
-            if (ImGui::Button("Enter"))
-            {
-              m_shared.s_currentUsername = usernameBuf;
-              m_shared.s_settingsChanged = true;
-
-              // Move to the next screen!
-              m_shared.s_AuthState = AuthState::LoggedIn; 
-
-              ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-          }
-          break;
+          ImGui::CloseCurrentPopup();
         }
-      case AuthState::LoggedIn:
-        {
-        ImFont* defaultFont = ImGui::GetIO().Fonts->Fonts[0];
-        ImGui::PushFont(defaultFont);
-
-        // Combine the label with the actual username 
-        // (Assumes m_shared.s_currentUsername is a std::string or const char*)
-        std::string displayText = "Username: " + m_shared.s_currentUsername;
-
-        // Calculate size based on the complete text
-        ImVec2 textSize = ImGui::CalcTextSize(displayText.c_str());
-        
-        float bottomLeftPadding = 20.0f; 
-        
-        // Calculate X and Y positions
-        float textX = bottomLeftPadding; 
-        float textY = screenSize.y - textSize.y - bottomLeftPadding; 
-
-        ImGui::SetCursorPos(ImVec2(textX, textY));
-        
-        // Push White text color (R: 1.0, G: 1.0, B: 1.0, Alpha: 1.0)
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); 
-        
-        // Print the final string
-        ImGui::Text("%s", displayText.c_str());
-        
-        ImGui::PopStyleColor();
-        ImGui::PopFont();
-        break;
+        ImGui::EndPopup();
       }
-      default:
-        break;
+    } else {
+      ImFont* defaultFont = ImGui::GetIO().Fonts->Fonts[0];
+      ImGui::PushFont(defaultFont);
+
+      // Combine the label with the actual username 
+      // (Assumes m_shared.s_currentUsername is a std::string or const char*)
+      std::string displayText = "Username: " + m_shared.s_currentUsername;
+
+      // Calculate size based on the complete text
+      ImVec2 textSize = ImGui::CalcTextSize(displayText.c_str());
+
+      float bottomLeftPadding = 20.0f; 
+
+      // Calculate X and Y positions
+      float textX = bottomLeftPadding; 
+      float textY = screenSize.y - textSize.y - bottomLeftPadding; 
+
+      ImGui::SetCursorPos(ImVec2(textX, textY));
+
+      // Push White text color (R: 1.0, G: 1.0, B: 1.0, Alpha: 1.0)
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); 
+
+      // Print the final string
+      ImGui::Text("%s", displayText.c_str());
+
+      ImGui::PopStyleColor();
+      ImGui::PopFont();
     }
   }
 
