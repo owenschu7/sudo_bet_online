@@ -42,20 +42,7 @@ public:
       m_shared.s_inboundEvents.pop();
 
       // GLOBAL EVENTS: You can handle things every screen cares about here!
-      if (incoming.action == Action::SYS_Disconnect) {
-        DEBUG_PRINT << "SYS_Disconnect detected\n";
-        m_shared.s_isOnline = false;
-        m_nextState = ScreenState::Start; // Kick them to the start screen
-        continue;
-      }
-      if (incoming.action == Action::SYS_Connect)
-      {
-        DEBUG_PRINT << "SYS_Disconnect detected\n";
-
-        m_shared.s_isOnline = true;
-        m_nextState = ScreenState::MainMenu;
-        continue;
-      }
+      // TODO: do handle these events (sys_disconnects etc)
 
       // Route the event to the specific active screen
       onNetworkEvent(incoming);

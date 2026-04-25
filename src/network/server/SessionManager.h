@@ -83,23 +83,26 @@ public:
         //send back a sys_connect_success packet
         GameEvent response;
         response.action = Action::SYS_Connect_Success;
+        response.game = Game::NONE;
         m_sendCallback(client_fd, response);
         return;
       }
       else if (event.action == Action::GET_AvailableTables)
       {
-        DEBUG_PRINT << "get the available tables NOW" << "\n";
-      }
-      else if (event.action == Action::GET_AvailableTables)
-      {
         DEBUG_PRINT << "GET_AvailableTables: \n";
-        GameEvent lobbyData = m_tableManager.getAvailableTablesListEvent();
-        m_sendCallback(client_fd, lobbyData);
+        GameEvent lobbyDataEvent = m_tableManager.getAvailableTablesListEvent();
+        m_sendCallback(client_fd, lobbyDataEvent);
       }
-      else if (event.action == Action::CREATE_Table)
+    } else if (event.game != Game::NONE)
+    {
+      if (event.action == Action::CREATE_Table)
       {
+        DEBUG_PRINT << "CREATE_Table DETECTED.\n";
         // Tell TableManager to spin up a new table dynamically
         m_tableManager.createTable(event.game);
+        //send a GET_AvailableTables_Repsonse back to the client
+        GameEvent lobbyDataEvent = m_tableManager.getAvailableTablesListEvent();
+        m_sendCallback(client_fd, lobbyDataEvent);
       }
       else if (event.action == Action::JOIN_Table)
       {
@@ -108,35 +111,39 @@ public:
         if (success)
         {
           //broadcast the event to the other people in the table
-          broadcastAction(tableID, currentPlayer, Action::JOIN_Table_Broadcast);
+          broadcastAction(tableID, currentPlayer, event);
 
           // send back a success packet
           GameEvent response;
           response.action = Action::JOIN_Table_Success;
+          response.game = Game::NONE;
           m_sendCallback(client_fd, response);
         } else {
           // send back a fail packet
           GameEvent response;
           response.stringPayload = "Table " + std::to_string(tableID) + " is full.";
           response.action = Action::JOIN_Table_Failed;
+          response.game = Game::NONE;
           m_sendCallback(client_fd, response);
         }
       }
     }
   }
 
-  void broadcastAction(int tableID, Player* player, Action a) // broadcast action to rest of players at a table
+  void broadcastAction(int tableID, Player* player, GameEvent event) // broadcast action to rest of players at a table
   {
     //loop through all the people in the table
     std::vector<Player*> currentPlayers = m_tableManager.getCurrentPlayers(tableID);
 
     for(int i = 0; i < currentPlayers.size(); i++)
     {
-      GameEvent event;
-      event.stringPayload = "sent from server";
-      event.action = a;
-      event.senderUUID = player->getUUID();
-      m_sendCallback(currentPlayers[i]->getFD(), event);
+      GameEvent broadcastEvent;
+      broadcastEvent.stringPayload = "sent from server to all players in table";
+      broadcastEvent.action = event.action;
+      broadcastEvent.game = event.game;
+
+      broadcastEvent.senderUUID = player->getUUID();
+      m_sendCallback(currentPlayers[i]->getFD(), broadcastEvent);
     }
   }
 

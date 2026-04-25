@@ -124,6 +124,7 @@ private:
       //create event
       GameEvent event;
       event.action = Action::GET_AvailableTables;
+      event.game = Game::NONE;
       event.senderUUID = m_shared.s_currentUUID;
       event.senderUsername = m_shared.s_currentUsername;
       //send event
@@ -237,6 +238,7 @@ private:
     }
   }
 
+
 public:
   MainMenuScreen(SharedData &sharedData) : Screen(sharedData)
   {
@@ -248,6 +250,7 @@ public:
   //handle events that came in from server to the client
   void onNetworkEvent(const GameEvent& event) override
   {
+    TRACE_FUNCTION();
     // Handle events specific only related to the screen
     switch (event.action)
     {
@@ -255,12 +258,6 @@ public:
         DEBUG_PRINT << "SYS_Connect_Success\n";
         DEBUG_PRINT << event.senderUsername << " joined the server.\n";
         m_shared.s_isOnline = true;
-        // Add them to your local ImGui player list
-        break;
-      case Action::GET_AvailableTables:
-        DEBUG_PRINT << "GET_AvailableTables\n";
-        DEBUG_PRINT << "payload:" << event.stringPayload << "\n";
-        //add the tables to the screen
         // Add them to your local ImGui player list
         break;
       default:

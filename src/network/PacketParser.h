@@ -38,6 +38,7 @@ public:
 
     // 2. READ THE DATA (In the EXACT order the PacketBuilder appended it)
     event.action         = static_cast<Action>(parser.read8());
+    event.game           = static_cast<Game>(parser.read8());
     event.senderUUID     = parser.readString();
     event.senderUsername = parser.readString();
     event.intPayload     = parser.read32();

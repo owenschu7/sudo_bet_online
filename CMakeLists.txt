@@ -59,6 +59,14 @@ set(SHARED_SOURCES
 # CLIENT EXECUTABLE
 set(CLIENT_SOURCES
   src/client.cpp
+  src/Screens/Screen.h
+  src/Screens/StartScreen.h
+  src/Screens/MainMenuScreen.h
+  src/Screens/GameScreen.h
+  src/Screens/SettingsScreen.h
+  src/Screens/availableTablesScreens.h
+  src/Screens/demoScreen.h
+  src/Screens/BaccaratTable.h
   # add the rest of your .cpp screens here
 )
 

@@ -319,6 +319,7 @@ private:
 
     PacketBuilder builder;
     builder.append8(static_cast<uint8_t>(event.action));
+    builder.append8(static_cast<uint8_t>(event.game));
     builder.appendString(event.senderUUID.c_str());
     builder.appendString(event.senderUsername.c_str()); 
     builder.append32(event.intPayload);

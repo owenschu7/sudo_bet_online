@@ -203,7 +203,6 @@ private:
 
     ImGui::SFML::Render(m_window); // Render the UI on top of whatever the current screen just drew
     m_window.display(); // this drops the curtain and swaps the hidden canvas (which you just drew on) with the visible one on your monitor
-
   }
 
   //network
@@ -230,30 +229,19 @@ private:
       }
 
       /*================================================================
-      * GAME EVENTS (Bets, Chat, Movement)
+      * GAME EVENTS (Bets, Raises, Checks etc)
       * These need to be packed into binary and shipped across the internet.
       ================================================================*/
       DEBUG_PRINT << "\nSENDING EVENT: " << event <<"\n";
 
       PacketBuilder packet;
       packet.append8(static_cast<uint8_t>(event.action)); // OpCode (1 byte)
+      packet.append8(static_cast<uint8_t>(event.game)); // OpCode (1 byte) NEW!!!!!!!!!!
       packet.appendString(event.senderUUID.c_str());    // UUID (Dynamic length + Null term)
       packet.appendString(event.senderUsername.c_str()); // Username + Null term
       packet.append32(event.intPayload);                // Int (4 bytes, Network Byte Order)
       packet.appendString(event.stringPayload.c_str()); // String (Dynamic length + Null term)
       packet.finalize();
-
-      const uint8_t* rawData = packet.getPtr();
-      size_t totalSize = packet.getSize();
-      DEBUG_PRINT << "[PACKET DUMP]\n"
-        << "Size: " << totalSize << " bytes\n"
-        << "Data: ";
-      for (size_t i = 0; i < totalSize; i++)
-      {
-        // Print each byte as a 2-digit Hex number (e.g., 0A, FF, 62)
-        DEBUG_PRINTF("%02X ", rawData[i]); 
-      }
-      DEBUG_PRINT << "\n";
 
       m_network.sendPacket(packet);
     }
@@ -269,7 +257,7 @@ private:
     while (m_network.pollPacket(rawPacket))
     {
       GameEvent newEvent = PacketParser::parse(rawPacket);
-      DEBUG_PRINT << "\nNEW EVENT RECIEVED: " << ActionToString(newEvent.action) << "\n";
+      DEBUG_PRINT << "\nNEW EVENT RECIEVED: " << newEvent << "\n";
       m_sharedData.s_inboundEvents.push(newEvent);
     }
   }
@@ -384,6 +372,22 @@ private:
     uuids::uuid_random_generator uuid_gen{gen};
     uuids::uuid const id = uuid_gen();
     return uuids::to_string(id);
+  }
+
+  //prints a packet to debug
+  void logPacket(PacketBuilder packet)
+  {
+    const uint8_t* rawData = packet.getPtr();
+    size_t totalSize = packet.getSize();
+    DEBUG_PRINT << "[PACKET DUMP]\n"
+      << "Size: " << totalSize << " bytes\n"
+      << "Data: ";
+    for (size_t i = 0; i < totalSize; i++)
+    {
+      // Print each byte as a 2-digit Hex number (e.g., 0A, FF, 62)
+      DEBUG_PRINTF("%02X ", rawData[i]); 
+    }
+    DEBUG_PRINT << "\n";
   }
 
   //core variables

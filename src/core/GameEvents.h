@@ -7,7 +7,7 @@ enum class Action
 {
   //C2S = client to server
   //S2C = server to client
-  
+
   //system events
   SYS_Connect = 0,         //Done
   SYS_Disconnect,          //D
@@ -15,6 +15,7 @@ enum class Action
   SYS_Connect_Failed,      //D
 
   GET_AvailableTables,     //D get a list of all available tables to play at
+  GET_AvailableTables_Response,//D get a list of all available tables to play at
   CREATE_Table,            //D user create a table
   JOIN_Table,              //D user joins
   JOIN_Table_Broadcast,    //D broadcast to all people in a table that a user joins
@@ -74,6 +75,7 @@ inline const char* ActionToString(Action type)
 
     // Tables/Lobby
     case Action::GET_AvailableTables:    return "GET_AvailableTables";
+    case Action::GET_AvailableTables_Response:    return "GET_AvailableTables_Response";
     case Action::CREATE_Table:           return "CREATE_Table";
     case Action::JOIN_Table:             return "JOIN_Table";
     case Action::JOIN_NET_Table:         return "JOIN_NET_Table";
@@ -91,14 +93,48 @@ inline const char* ActionToString(Action type)
   }
 }
 
+inline const char* GameToString(Game game) 
+{
+  switch (game)
+  {
+    // System
+    case Game::NONE:            return "NONE";
+    case Game::BACCARAT:        return "BACCARAT";
+    case Game::BLACKJACK:       return "BLACKJACK";
+    case Game::POKER:           return "POKER";
+
+    // Catch-all
+    default:                    return "UNKNOWN_EVENT";
+  }
+}
+
+inline Game StringToGame(std::string game)
+{
+    if (game == "NONE")          return Game::NONE;
+    if (game == "BACCARAT")      return Game::BACCARAT;
+    if (game == "BLACKJACK")     return Game::BLACKJACK;
+    if (game == "POKER")         return Game::POKER;
+
+    // Catch-all
+    return Game::NONE;
+}
+
+
 // 2. Tells C++ how to print a GameEvent struct to the console
 inline std::ostream& operator<<(std::ostream& os, const GameEvent& event) 
 {
   os << "{" 
-    << ActionToString(event.action) 
+    << ActionToString(event.action)
+    << " | Game: " << GameToString(event.game)
     << " | User: " << (event.senderUsername.empty() ? "None" : event.senderUsername)
     << " | PayloadInt: " << event.intPayload 
     << " | PayloadStr: '" << event.stringPayload << "'"
     << "}";
   return os;
 }
+
+
+
+
+
+

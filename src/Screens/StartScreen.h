@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "../core/Debug.h"
 
+
 class StartScreen : public Screen
 {
 private:
@@ -15,7 +16,7 @@ private:
   {
     ImFont* titleFont = ImGui::GetIO().Fonts->Fonts[1];
     ImGui::PushFont(titleFont);
-    const char* titleString = "Baccarat Online";
+    const char* titleString = "Sudo Bet Online";
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
     ImVec2 textSize = ImGui::CalcTextSize(titleString);
 
@@ -56,12 +57,12 @@ private:
     {
       //connecting to the server
 
-      DEBUG_PRINT << "CREATING EVENT: ";
       GameEvent connectEvent;
       connectEvent.action = Action::SYS_Connect;
+      connectEvent.game = Game::NONE;
       connectEvent.senderUsername = m_shared.s_currentUsername;
       connectEvent.senderUUID = m_shared.s_currentUUID;
-      connectEvent.stringPayload = ""; // Placeholder for future auth
+      connectEvent.stringPayload = "";
       m_shared.s_outboundEvents.push(connectEvent);
       DEBUG_PRINT << connectEvent;
 

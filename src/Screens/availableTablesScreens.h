@@ -20,16 +20,76 @@ private:
   };
 
   struct GameTableData {
+    int tableID;
+    Game game;
+    int playerCount;
+    int maxPlayers;
     std::string name;
-    bool isOnline;
     std::vector<Player> players;
   };
 
-  // Example mock data you would pass in or access globally
-  std::vector<GameTableData> myTables = {
-    {"Poker", true, {{"Owen", 5000}, {"John", 1200}, {"Trevor", 1300}}},
-    {"Blackjack", false, {}},
-  };
+  // myTables holds whatever the servers sends it regarding table data
+  std::vector<GameTableData> myTables;
+
+  std::vector<GameTableData> parseAvailableTablesList(const std::string& payload)
+  {
+    std::vector<GameTableData> parsedTables;
+    std::stringstream payloadStream(payload);
+    std::string tableSegment;
+
+    // Split the payload by the '|' delimiter
+    while (std::getline(payloadStream, tableSegment, '|'))
+    {
+        // Skip empty segments (like the trailing delimiter)
+        if (tableSegment.empty())
+        {
+            continue;
+        }
+
+        std::stringstream segmentStream(tableSegment);
+        std::string field;
+
+        // Initialize an empty struct
+        GameTableData table; 
+
+        try
+        {
+            // Parse ID
+            if (std::getline(segmentStream, field, ','))
+            {
+                table.tableID = std::stoi(field);
+            }
+            // Parse Game Type (requires casting the int back to the Game enum)
+            if (std::getline(segmentStream, field, ','))
+            {
+                table.game = static_cast<Game>(std::stoi(field)); 
+            }
+            // Parse Current Players
+            if (std::getline(segmentStream, field, ','))
+            {
+                table.playerCount = std::stoi(field);
+            }
+            // Parse Max Players
+            if (std::getline(segmentStream, field, ','))
+            {
+                table.maxPlayers = std::stoi(field);
+            }
+
+            // Note: 'name' and 'players' are not present in the CSV string 
+            // from getAvailableTablesListEvent(), so they remain default-initialized 
+            // (empty string and empty vector).
+
+            parsedTables.push_back(table);
+
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing table segment '" << tableSegment << "': " << e.what() << "\n";
+        }
+    }
+
+    return parsedTables;
+}
+
+
 
   //table for the available tables
   void drawTable(ImVec2 screenSize, const std::vector<GameTableData>& availableTables)
@@ -58,16 +118,16 @@ private:
     // Safety: Only 1 StyleVar for CellPadding here to keep it simple
     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(10.0f, 10.0f));
 
-    if (ImGui::BeginTable("MainTablesList", 3, flags, tableSize))
+    if (ImGui::BeginTable("MainTablesList", 2, flags, tableSize))
     {
       ImGui::TableSetupColumn("Table List", ImGuiTableColumnFlags_WidthStretch, 0.6f);
-      ImGui::TableSetupColumn("Status",     ImGuiTableColumnFlags_WidthStretch, 0.2f);
       ImGui::TableSetupColumn("Action",     ImGuiTableColumnFlags_WidthStretch, 0.2f);
       ImGui::TableHeadersRow();
 
       for (int i = 0; i < (int)availableTables.size(); ++i)
       {
         const auto& table = availableTables[i];
+
         ImGui::PushID(i); 
 
         // Start the main row
@@ -80,20 +140,27 @@ private:
         // inside the same row structure. SpanFullWidth is enough.
         ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
 
-        bool isRowExpanded = ImGui::TreeNodeEx((void*)(intptr_t)i, treeFlags, "%s", table.name.c_str());
-
-        // --- Column 1: Status ---
-        ImGui::TableNextColumn();
-        if (table.isOnline) 
-          ImGui::TextColored(ImVec4(0, 1, 0, 1), "Online");
-        else 
-          ImGui::TextColored(ImVec4(1, 0, 0, 1), "Offline");
+        // TODO: change the table name to be user generated (need to prompt user after pressing create table)
+        bool isRowExpanded = ImGui::TreeNodeEx((void*)(intptr_t)i, treeFlags, "%s", GameToString(table.game)); // prints the name of the table
+        //table is the current table in the availabletables vector
 
         // --- Column 2: Action ---
         // present a join button regardless of if there is people in it
         ImGui::TableNextColumn();
-        if (ImGui::Button("JOIN", ImVec2(-FLT_MIN, 0))) {
+        if (ImGui::Button("JOIN", ImVec2(-FLT_MIN, 0)))
+        {
           DEBUG_PRINT << "availableTablesScreen.h: drawTable(): joining " << table.name << std::endl;
+
+          //create event
+          GameEvent event;
+          event.action = Action::JOIN_Table;
+          event.game = table.game;
+          event.senderUUID = m_shared.s_currentUUID;
+          event.senderUsername = m_shared.s_currentUsername;
+          //send event
+          m_shared.s_outboundEvents.push(event);
+          DEBUG_PRINT << "SENDING EVENT: " << event << "\n";
+          //m_nextState = table game they are joining
         }
 
         // --- 4. Sub-Table (The problematic part) ---
@@ -201,19 +268,17 @@ private:
       ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
 
       // Game selection buttons
-      if (ImGui::Button("Baccarat", ImVec2(0, 0))) {
-        // FIX: get users account info and add to newTable
-
-        //get player info and add it to the table
-        Player currentUser = Player{"currentUser", 100};
-
-        std::vector<Player> players = {currentUser};
-
-        //create the new table being created
-        GameTableData newTable = GameTableData{"Baccarat", true, players};
-
-        //update mytables with push_back(newtable)
-        myTables.push_back(newTable);
+      if (ImGui::Button("Baccarat", ImVec2(0, 0)))
+      {
+        //create event
+        GameEvent event;
+        event.action = Action::CREATE_Table;
+        event.game = Game::BACCARAT;
+        event.senderUUID = m_shared.s_currentUUID;
+        event.senderUsername = m_shared.s_currentUsername;
+        //send event
+        m_shared.s_outboundEvents.push(event);
+        DEBUG_PRINT << "SENDING EVENT: " << event << "\n";
 
         ImGui::CloseCurrentPopup(); // Closes the modal upon selection
       }
@@ -230,20 +295,17 @@ private:
 
       ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
 
-      if (ImGui::Button("Blackjack", ImVec2(0, 0))) {
-        // FIX: get users account info and add to newTable
-
-        //get player info and add it to the table
-        //
-        Player currentUser = Player{"currentUser", 100};
-
-        std::vector<Player> players = {currentUser};
-
-        //create the new table being created
-        GameTableData newTable = GameTableData{"Blackjack", true, players};
-
-        //update mytables with push_back(newtable)
-        myTables.push_back(newTable);
+      if (ImGui::Button("Blackjack", ImVec2(0, 0)))
+      {
+        //create event
+        GameEvent event;
+        event.action = Action::CREATE_Table;
+        event.game = Game::BLACKJACK;
+        event.senderUUID = m_shared.s_currentUUID;
+        event.senderUsername = m_shared.s_currentUsername;
+        //send event
+        m_shared.s_outboundEvents.push(event);
+        DEBUG_PRINT << "SENDING EVENT: " << event << "\n";
 
         ImGui::CloseCurrentPopup();
       }
@@ -260,19 +322,17 @@ private:
 
       ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
 
-      if (ImGui::Button("Poker", ImVec2(0, 0))) {
-        // FIX: get users account info and add to newTable
-
-        //get player info and add it to the table
-        Player currentUser = Player{"currentUser", 100};
-
-        std::vector<Player> players = {currentUser};
-
-        //create the new table being created
-        GameTableData newTable = GameTableData{"Poker", true, players};
-
-        //update mytables with push_back(newtable)
-        myTables.push_back(newTable);
+      if (ImGui::Button("Poker", ImVec2(0, 0)))
+      {
+        //create event
+        GameEvent event;
+        event.action = Action::CREATE_Table;
+        event.game = Game::POKER;
+        event.senderUUID = m_shared.s_currentUUID;
+        event.senderUsername = m_shared.s_currentUsername;
+        //send event
+        m_shared.s_outboundEvents.push(event);
+        DEBUG_PRINT << "SENDING EVENT: " << event << "\n";
 
         ImGui::CloseCurrentPopup();
       }
@@ -313,6 +373,8 @@ public:
 
   void update() override
   {
+    processEventsFromServer(); // used to actually check if there are any incoming packets in the queue
+
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
     ImGui::SetNextWindowSize(screenSize);
@@ -344,6 +406,25 @@ public:
 
     ImGui::End();
   }
+
+  void onNetworkEvent(const GameEvent& event) override
+  {
+    TRACE_FUNCTION();
+    // Handle events specific only related to the screen
+    switch (event.action)
+    {
+      case Action::GET_AvailableTables_Response:
+        DEBUG_PRINT << "GET_AvailableTables_Response\n";
+        //clear original vector list
+        myTables.clear();
+        // parse the packet
+        myTables = parseAvailableTablesList(event.stringPayload);
+        break;
+      default:
+        break;
+    }
+  }
+
 
   void draw(sf::RenderWindow& window) override
   {

@@ -34,8 +34,12 @@ public:
   TableManager() // constructor initalizes two tables on boot
   {
     TRACE_FUNCTION();
-    m_tables[m_next_tableID++] = std::make_unique<Baccarat_table>(1, 8);
-    m_tables[m_next_tableID++] = std::make_unique<Baccarat_table>(2, 8);
+    int id = m_next_tableID++;
+    m_tables[id] = std::make_unique<Baccarat_table>(id, 7);
+    id = m_next_tableID++;
+    m_tables[id] = std::make_unique<Baccarat_table>(id, 8);
+    id = m_next_tableID++;
+    m_tables[id] = std::make_unique<Baccarat_table>(id, 9);
     DEBUG_PRINT << "TableManager: Initialized " << m_tables.size() << " tables on the casino floor.\n";
   }
 
@@ -70,19 +74,21 @@ public:
   }
 
   // Packages up all the table info so SessionManager can send it to a new client
-  //returns a GameEvent that holds
+  //returns a GameEvent that holds a string payload of the available tables in CSV form
   GameEvent getAvailableTablesListEvent()
   {
     TRACE_FUNCTION();
     GameEvent event;
 
-    event.action = Action::GET_AvailableTables;
+    event.action = Action::GET_AvailableTables_Response;
+    event.game = Game::NONE;
 
     // We use a stringstream to build a "CSV-style" string of all tables
     // Format: "ID,Type,Current,Max|ID,Type,Current,Max|"
     std::stringstream ss;
 
-    for (const auto& pair : m_tables) {
+    for (const auto& pair : m_tables)
+    {
       BaseTable* t = pair.second.get();
 
       ss << t->getTableID() << ","
@@ -105,9 +111,11 @@ public:
     switch(g)
     {
       case Game::BACCARAT:
+        id = m_next_tableID++;
         m_tables[id] = std::make_unique<Baccarat_table>(id, 8); // maxplayers is hardcoded at 8
         break;
       case Game::BLACKJACK:
+        //id = m_next_tableID++;
         //m_tables[id] = std::make_unique<Blackjack_table>(id, 8); // maxplayers is hardcoded at 8
         break;
       case Game::POKER:
