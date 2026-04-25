@@ -56,6 +56,8 @@ public:
   // ----------------------------------------------------------------------
   // SETTERS & ACTIONS (Safe ways to modify the player's state)
   // ----------------------------------------------------------------------
+  void setUsername(std::string username) { m_username = username; }
+  void setUUID(std::string uuid) { m_UUID = uuid; }
   void setCurrTableID(int tableID) 
   {
     m_currTableID = tableID;

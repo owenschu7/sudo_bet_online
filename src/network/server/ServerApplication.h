@@ -50,6 +50,8 @@ public:
     // delete m_tableManager;
   }
 
+  //runs the server
+  //checks the data being sent in if a user sent data or a new connection happens
   void run()
   {
     TRACE_FUNCTION();
@@ -197,7 +199,6 @@ private:
 
     return true;
   }
-
 
   // accepts a new incoming TCP connection and sets up their buffer.
   void acceptNewClient()

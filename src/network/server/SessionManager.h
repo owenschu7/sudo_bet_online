@@ -34,10 +34,8 @@ class SessionManager
 {
 public:
   // Constructor: Pass in the TableManager by reference
-  SessionManager(
-    std::function<void(int fd, const GameEvent& event)> sendCallback,
-    TableManager& tableManager
-  ) : m_sendCallback(sendCallback), m_tableManager(tableManager) 
+  SessionManager(std::function<void(int fd, const GameEvent& event)> sendCallback, TableManager& tableManager)
+  : m_sendCallback(sendCallback), m_tableManager(tableManager) 
   {
   }
 
@@ -60,121 +58,64 @@ public:
     TRACE_FUNCTION();
     DEBUG_PRINT << "RECIEVED EVENT: " << event << "\n";
 
-    // ---------------------------------------------------------
-    // SYSTEM EVENTS (Login, Disconnect, etc.)
-    // ---------------------------------------------------------
-    if (event.type == EventType::SYS_Connect)
+    // find out who sent the request
+    auto it = m_activePlayers.find(client_fd);
+    if (it == m_activePlayers.end())
     {
-      // Instantiating your actual Player class! 
-      auto newPlayer = std::make_unique<Player>(client_fd, event.senderUUID, event.senderUsername);
-
-      // Store the player in our active session map
-      m_activePlayers[client_fd] = std::move(newPlayer);
-
-      GameEvent response;
-      response.type = EventType::SYS_Connect_Success;
-      m_sendCallback(client_fd, response);
+      DEBUG_PRINT << "[Warning] Received event from unknown FD: " << client_fd << "\n";
       return;
     }
-
-    // ---------------------------------------------------------
-    // AUTHENTICATION GUARD (Updated Fix)
-    // ---------------------------------------------------------
-    auto it = m_activePlayers.find(client_fd);
-    if (it == m_activePlayers.end()) {
-      std::cerr << "[Warning] Received event from unknown FD: " << client_fd << "\n";
-      return; 
-    }
-
     // Grab the raw pointer to the player
     Player* currentPlayer = it->second.get();
 
-    // Block Guests from accessing the casino floor
-    if (currentPlayer->getUsername() == "Guest" && event.type != EventType::SYS_Connect) {
-      std::cerr << "[Warning] Guest on FD " << client_fd << " tried to send restricted event.\n";
-      return;
-    }
+//  // Block Guests from accessing the casino floor
+//  if (currentPlayer->getUsername() == "Guest" && event.action != Action::SYS_Connect) {
+//    std::cerr << "[Warning] Guest on FD " << client_fd << " tried to send restricted event.\n";
+//    return;
+//  }
 
-    // ---------------------------------------------------------
-    // MASTER ROUTING SWITCH
-    // ---------------------------------------------------------
-    switch (event.type) 
+    // if the event.game is NULL then we check certian actions only
+    // (we dont need to check a place bet action if there is no table)
+    if (event.game == Game::NONE)
     {
-      // === ACCOUNT & AUTHENTICATION ===
-      case EventType::USER_In:
-      case EventType::USER_Out:
-      case EventType::USER_CreateAccount:
-      case EventType::USER_ChangeUsername:
-        DEBUG_PRINT << "Handling Auth Event for: " << currentPlayer->getUsername() << "\n";
-        break;
+      // here we only gotta check what the user wants to do regarding the tables
+      // get, join, create,
+      if (event.action == Action::SYS_Connect)
+      {
+        //here we look for the player on the given fd and we update their username and uuid for their player object then send a sys_connect_success back
+        currentPlayer->setUsername(event.senderUsername);
+        currentPlayer->setUUID(event.senderUUID);
 
-      // === LOBBY & TABLE MANAGEMENT ===
-      case EventType::GET_AvailableTables:
-        {
-          DEBUG_PRINT << "GET_AvailableTables: \n";
-          GameEvent lobbyData = m_tableManager.getAvailableTablesListEvent();
-          m_sendCallback(client_fd, lobbyData);
-          break;
+        //send back a sys_connect_success packet
+        GameEvent response;
+        response.action = Action::SYS_Connect_Success;
+        m_sendCallback(client_fd, response);
+        return;
+      }
+      else if (event.action == Action::GET_AvailableTables)
+      {
+        DEBUG_PRINT << "get the available tables NOW" << "\n";
+      }
+      else if (event.action == Action::GET_AvailableTables)
+      {
+        DEBUG_PRINT << "GET_AvailableTables: \n";
+        GameEvent lobbyData = m_tableManager.getAvailableTablesListEvent();
+        m_sendCallback(client_fd, lobbyData);
+      }
+      else if (event.action == Action::CREATE_Table)
+      {
+        // TODO: Tell TableManager to spin up a new table dynamically
+      }
+      else if (event.action == Action::JOIN_Table)
+      {
+        int tableToJoin = event.intPayload;
+        bool success = m_tableManager.addPlayerToTable(tableToJoin, currentPlayer);
+        if (success) {
+          // send success packet 
+        } else { 
+          // send table full error 
         }
-      case EventType::CREATE_Table:
-        {
-          // TODO: Tell TableManager to spin up a new table dynamically
-          break;
-        }
-      case EventType::JOIN_Table:
-        {
-          int tableToJoin = event.intPayload;
-          bool success = m_tableManager.addPlayerToTable(tableToJoin, currentPlayer);
-          if (success) { 
-            // send success packet 
-          } else { 
-            // send table full error 
-          }
-          break;
-        }
-      case EventType::LEAVE_Table:
-        {
-          m_tableManager.removePlayerFromTable(currentPlayer->getCurrTableID(), currentPlayer);
-          break;
-        }
-
-      // === CHAT ===
-      case EventType::CHAT_Send:
-        {
-          // TODO: Broadcast chat message to the lobby or the specific table
-          break;
-        }
-
-      // === IN-GAME ACTIONS ===
-      case EventType::BC_USER_Bet:
-      case EventType::BJ_USER_PlaceBet:
-      case EventType::BJ_USER_PlayerHit:
-      case EventType::BJ_USER_PlayerStand:
-        {
-          m_tableManager.routeEventToTable(currentPlayer->getCurrTableID(), currentPlayer, event);
-          break;
-        }
-
-      // === OUTBOUND/SERVER-ONLY EVENTS ===
-      case EventType::SYS_Disconnect:
-      case EventType::SYS_Connect_Success:
-      case EventType::SYS_Connect_Failed:
-      case EventType::NET_Connect_Success:
-      case EventType::NET_Connect_Failed:
-      case EventType::NET_NewAccount_Success:
-      case EventType::JOIN_NET_Table:
-      case EventType::LEAVE_NET_Table:
-      case EventType::CHAT_NET_Recv:
-      case EventType::BC_NET_Bet:
-      case EventType::BC_NET_Ready:
-      case EventType::BC_NET_AllReady:
-        std::cerr << "[Warning] Client sent a server-only event type: " 
-          << static_cast<int>(event.type) << "\n";
-        break;
-
-      default:
-        std::cerr << "[Error] Unknown EventType received.\n";
-        break;
+      }
     }
   }
 
@@ -202,5 +143,6 @@ private:
   TableManager& m_tableManager; // Reference to the table manager
 
   // The actual roster of logged-in players mapped to their sockets
+  // <socket fd (int), player>
   std::unordered_map<int, std::unique_ptr<Player>> m_activePlayers; 
 };

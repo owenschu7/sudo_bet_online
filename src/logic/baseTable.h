@@ -4,17 +4,11 @@
 #include "../core/GameEvents.h" 
 #include "../network/server/player.h"
 
-enum class GameType {
-  BACCARAT = 1,
-  POKER = 2,
-  BLACKJACK = 3
-};
-
 enum class TableState {
   WAITING_FOR_PLAYERS,
   BETTING_PHASE,
   GAME_IN_PROGRESS,
-  PAYOUT
+  PAYOUT,
 };
 
 class BaseTable {
@@ -22,7 +16,7 @@ protected:
   int tableID;
   GameType type;
   TableState state;
-  int maxPlayers;
+  int maxPlayers = 6;
   std::vector<Player*> currentPlayers;
 
 public:
