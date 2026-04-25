@@ -65,7 +65,7 @@ enum class EventType
 // - std::string senderUsername
 // - std::string stringPayload
 // - int intPayload
-struct GameEvent 
+struct GameEvent
 {
   EventType type;
 
@@ -74,8 +74,8 @@ struct GameEvent
 
 
   // Optional data attached to the event. 
-  std::string stringPayload = ""; 
-  int intPayload = 0;             
+  std::string stringPayload = "";
+  int intPayload = 0;
 };
 
 

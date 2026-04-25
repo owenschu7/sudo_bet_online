@@ -56,13 +56,14 @@ private:
     {
       //connecting to the server
 
-      DEBUG_PRINT << "StartScreen: Pushing SYS_Connect to server...\n";
+      DEBUG_PRINT << "CREATING EVENT: ";
       GameEvent connectEvent;
       connectEvent.type = EventType::SYS_Connect;
       connectEvent.senderUsername = m_shared.s_currentUsername;
       connectEvent.senderUUID = m_shared.s_currentUUID;
       connectEvent.stringPayload = ""; // Placeholder for future auth
       m_shared.s_outboundEvents.push(connectEvent);
+      DEBUG_PRINT << connectEvent;
 
       //mainmenu will handle if connection success or not
       m_nextState = ScreenState::MainMenu;

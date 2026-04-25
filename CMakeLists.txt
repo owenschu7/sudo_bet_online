@@ -7,7 +7,6 @@ project(CMakeSFMLProject LANGUAGES CXX)
 # (for neovim users using clangd)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # instead of downloading SFML, CMake reaches out to github and
@@ -60,12 +59,6 @@ set(SHARED_SOURCES
 # CLIENT EXECUTABLE
 set(CLIENT_SOURCES
   src/client.cpp
-  src/Screens/Screen.h
-  src/Screens/StartScreen.h
-  src/Screens/MainMenuScreen.h
-  src/Screens/SettingsScreen.h
-  src/Screens/availableTablesScreens.h
-  src/Screens/demoScreen.h
   # add the rest of your .cpp screens here
 )
 
@@ -73,7 +66,7 @@ add_executable(client ${CLIENT_SOURCES} ${SHARED_SOURCES})
 
 # SERVER EXECUTABLE
 set(SERVER_SOURCES
-  src/network/server/server.cpp
+  src/server.cpp
   # If you create a .cpp class later, it goes here!
 )
 
@@ -83,10 +76,9 @@ add_executable(server ${SERVER_SOURCES} ${SHARED_SOURCES})
 target_compile_features(client PRIVATE cxx_std_20)
 target_compile_features(server PRIVATE cxx_std_20)
 
-
 # this connects the SFML libraries to your executable.
-# if your games noods networking, you would simlpy add sfml-network to this
-target_link_libraries(client PRIVATE 
+# if your games needs networking, you would simlpy add sfml-network to this
+target_link_libraries(client PRIVATE
   SFML::Graphics
   ImGui-SFML::ImGui-SFML
   uuid

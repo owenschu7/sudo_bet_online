@@ -1,4 +1,5 @@
 #include "network/client/clientApplication.h"
+#include <SFML/Graphics.hpp>
 
 int main()
 {
