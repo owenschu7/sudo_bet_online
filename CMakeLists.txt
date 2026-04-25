@@ -66,7 +66,7 @@ set(CLIENT_SOURCES
   src/Screens/SettingsScreen.h
   src/Screens/availableTablesScreens.h
   src/Screens/demoScreen.h
-  src/Screens/BaccaratTable.h
+  src/Screens/BaccaratScreen.cpp
   # add the rest of your .cpp screens here
 )
 

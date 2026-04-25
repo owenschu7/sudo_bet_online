@@ -11,7 +11,7 @@
 #include "../../Screens/Screen.h"
 #include "../../Screens/StartScreen.h"
 #include "../../Screens/MainMenuScreen.h"
-#include "../../Screens/GameScreen.h"
+#include "../../Screens/BaccaratScreen.h"
 #include "../../Screens/SettingsScreen.h"
 #include "../../Screens/demoScreen.h"
 #include "../../Screens/availableTablesScreens.h"
@@ -283,8 +283,8 @@ private:
           m_currentScreen = std::make_unique<SettingsScreen>(m_sharedData); break;
         case ScreenState::Tables:
           m_currentScreen = std::make_unique<AvailableTablesScreen>(m_sharedData); break;
-        case ScreenState::Game:
-          m_currentScreen = std::make_unique<GameScreen>(m_sharedData); break;
+        case ScreenState::Baccarat:
+          m_currentScreen = std::make_unique<BaccaratScreen>(m_sharedData); break;
         case ScreenState::Demo:
           m_currentScreen = std::make_unique<DemoScreen>(m_sharedData); break;
         case ScreenState::Quit:
@@ -308,6 +308,10 @@ private:
 
   void drawGlobalDebugUI()
   {
+    //for if the user wants to show these
+    static bool showMouseTracker = false;
+    static bool showHoverTracker = false;
+
     //displays on top left corner
     ImGui::SetNextWindowPos(ImVec2(10.0f, 10.0f));
 
@@ -358,6 +362,72 @@ private:
         if (ImGui::Button("Simulate Event")) { /* Logic goes here */ }
         ImGui::SameLine();
         if (ImGui::Button("Clear Queues")) { /* Logic goes here */ }
+      }
+
+      ImGui::Separator();
+
+      if (ImGui::CollapsingHeader("Mouse/Positioning"))
+      {
+        // Buttons to toggle our new popout windows
+        if (ImGui::Button("Toggle Mouse Position")) 
+        { 
+          showMouseTracker = !showMouseTracker; 
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Toggle Hover Tracker")) 
+        { 
+          showHoverTracker = !showHoverTracker; 
+        }
+      }
+      ImGui::End();
+    }
+
+    // ==========================================
+    // POPOUT WINDOW 1: Real-time Mouse Tracker
+    // ==========================================
+    if (showMouseTracker)
+    {
+      // Passing &showMouseTracker adds an "X" close button to the corner
+      ImGui::Begin("Mouse Position Tracker", &showMouseTracker, ImGuiWindowFlags_AlwaysAutoResize);
+      
+      ImVec2 mousePos = ImGui::GetIO().MousePos;
+      ImGui::Text("X: %.1f", mousePos.x);
+      ImGui::Text("Y: %.1f", mousePos.y);
+      
+      ImGui::End();
+    }
+
+    // ==========================================
+    // POPOUT WINDOW 2: Element Hover Tracker
+    // ==========================================
+    if (showHoverTracker)
+    {
+      ImGui::Begin("SFML Hover Tracker", &showHoverTracker, ImGuiWindowFlags_AlwaysAutoResize);
+
+      ImVec2 mousePos = ImGui::GetIO().MousePos;
+
+      // Convert ImGui mouse position to SFML Vector2f
+      sf::Vector2f sfMousePos(mousePos.x, mousePos.y);
+
+      // Ask the active screen what we are hovering over!
+      std::string hoveredItem = "None";
+      if (m_currentScreen)
+      {
+          hoveredItem = m_currentScreen->getHoveredElement(sfMousePos);
+      }
+
+      ImGui::Text("Currently Hovering:");
+      ImGui::Separator();
+
+      if (hoveredItem != "None" && hoveredItem != "Table Background")
+      {
+        // Green text if we are hovering over an actual interactable object
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "> %s <", hoveredItem.c_str());
+      }
+      else
+      {
+        // Default text for background/nothing
+        ImGui::Text("%s", hoveredItem.c_str());
       }
 
       ImGui::End();

@@ -272,7 +272,7 @@ public:
       //pressing "Enter" signals we want to switch to the game state
       if (keyPressed->scancode == sf::Keyboard::Scancode::Enter)
       {
-        m_nextState = ScreenState::Game;
+        m_nextState = ScreenState::Baccarat;
       }
     }
   }

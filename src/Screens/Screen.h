@@ -1,7 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "../core/SharedData.h"
-#include "../core/Debug.h"
 
 //an enum to help us switch between screens easily
 enum class ScreenState
@@ -12,7 +11,9 @@ enum class ScreenState
   MainMenu,
   Settings,
   Tables,
-  Game,
+  Baccarat,
+  Blackjack,
+  Poker,
   Quit,
   Demo
 };
@@ -54,4 +55,17 @@ public:
 
   // this allows a screen to tell the main loop it's time to switch
   virtual ScreenState getNextState() const = 0;
+
+
+  // By default, it returns "None", but specific screens can override it!
+  virtual std::string getHoveredElement(sf::Vector2f mousePos)
+  {
+    return "None";
+  }
 };
+
+
+
+
+
+
