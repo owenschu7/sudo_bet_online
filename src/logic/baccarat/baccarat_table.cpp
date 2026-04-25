@@ -5,7 +5,7 @@
 #include "baccarat_table.h"
 #include "baccarat_defs.h"
 
-Baccarat_table::Baccarat_table(int id, int maxP) : BaseTable(id, GameType::BACCARAT, maxP)
+Baccarat_table::Baccarat_table(int id, int maxP) : BaseTable(id, Game::BACCARAT, maxP)
 {
 }
 

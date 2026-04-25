@@ -1,5 +1,5 @@
-#include "Screen.h"
 #include <SFML/Graphics.hpp>
+#include "Screen.h"
 #include <imgui.h>
 
 class SettingsScreen : public Screen

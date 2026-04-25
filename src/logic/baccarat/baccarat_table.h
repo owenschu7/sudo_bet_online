@@ -18,10 +18,11 @@ public:
 
   //plays a round returns who wins also it pushes the result to m_outcomes
   Round_Record play_round(); // plays 1 round and returns a record of that round played
- 
+
   void print_history_of_round(int round);
 
   void handleEvent(Player* player, const GameEvent& event) override;
+
   void update() override;
 
 private:

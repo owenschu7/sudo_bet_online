@@ -223,7 +223,7 @@ private:
       * SYSTEM EVENTS
       * if the packet is a sys_connect we dont send a packet, instead we call connectToServer()
       ================================================================*/
-      if (event.type == EventType::SYS_Connect)
+      if (event.action == Action::SYS_Connect)
       {
         DEBUG_PRINT << "sys_connect detected\n";
         m_network.connectToServer("127.0.0.1", "8080");
@@ -236,7 +236,7 @@ private:
       DEBUG_PRINT << "\nSENDING EVENT: " << event <<"\n";
 
       PacketBuilder packet;
-      packet.append8(static_cast<uint8_t>(event.type)); // OpCode (1 byte)
+      packet.append8(static_cast<uint8_t>(event.action)); // OpCode (1 byte)
       packet.appendString(event.senderUUID.c_str());    // UUID (Dynamic length + Null term)
       packet.appendString(event.senderUsername.c_str()); // Username + Null term
       packet.append32(event.intPayload);                // Int (4 bytes, Network Byte Order)
@@ -269,7 +269,7 @@ private:
     while (m_network.pollPacket(rawPacket))
     {
       GameEvent newEvent = PacketParser::parse(rawPacket);
-      DEBUG_PRINT << "\nNEW EVENT RECIEVED: " << EventTypeToString(newEvent.type) << "\n";
+      DEBUG_PRINT << "\nNEW EVENT RECIEVED: " << ActionToString(newEvent.action) << "\n";
       m_sharedData.s_inboundEvents.push(newEvent);
     }
   }

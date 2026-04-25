@@ -14,14 +14,14 @@ enum class TableState {
 class BaseTable {
 protected:
   int tableID;
-  GameType type;
+  Game game;
   TableState state;
   int maxPlayers = 6;
   std::vector<Player*> currentPlayers;
 
 public:
-  BaseTable(int id, GameType t, int maxP)
-  : tableID(id), type(t), state(TableState::WAITING_FOR_PLAYERS), maxPlayers(maxP)
+  BaseTable(int id, Game g, int maxP)
+  : tableID(id), game(g), state(TableState::WAITING_FOR_PLAYERS), maxPlayers(maxP)
   {
   }
 
@@ -57,6 +57,12 @@ public:
       state = TableState::WAITING_FOR_PLAYERS;
     }
   }
+  
+  virtual std::vector<Player*> getCurrentPlayers()
+  {
+    return currentPlayers;
+  }
+
 
   // --- GETTER IMPLEMENTATIONS ---
   int getTableID() const
@@ -64,9 +70,9 @@ public:
     return tableID; 
   }
 
-  GameType getGameType() const
+  Game getGame() const
   {
-    return type; 
+    return game;
   }
 
   TableState getState() const

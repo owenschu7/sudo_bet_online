@@ -58,7 +58,7 @@ private:
 
       DEBUG_PRINT << "CREATING EVENT: ";
       GameEvent connectEvent;
-      connectEvent.type = EventType::SYS_Connect;
+      connectEvent.action = Action::SYS_Connect;
       connectEvent.senderUsername = m_shared.s_currentUsername;
       connectEvent.senderUUID = m_shared.s_currentUUID;
       connectEvent.stringPayload = ""; // Placeholder for future auth

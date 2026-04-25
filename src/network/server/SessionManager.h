@@ -68,12 +68,6 @@ public:
     // Grab the raw pointer to the player
     Player* currentPlayer = it->second.get();
 
-//  // Block Guests from accessing the casino floor
-//  if (currentPlayer->getUsername() == "Guest" && event.action != Action::SYS_Connect) {
-//    std::cerr << "[Warning] Guest on FD " << client_fd << " tried to send restricted event.\n";
-//    return;
-//  }
-
     // if the event.game is NULL then we check certian actions only
     // (we dont need to check a place bet action if there is no table)
     if (event.game == Game::NONE)
@@ -104,18 +98,45 @@ public:
       }
       else if (event.action == Action::CREATE_Table)
       {
-        // TODO: Tell TableManager to spin up a new table dynamically
+        // Tell TableManager to spin up a new table dynamically
+        m_tableManager.createTable(event.game);
       }
       else if (event.action == Action::JOIN_Table)
       {
-        int tableToJoin = event.intPayload;
-        bool success = m_tableManager.addPlayerToTable(tableToJoin, currentPlayer);
-        if (success) {
-          // send success packet 
-        } else { 
-          // send table full error 
+        int tableID = event.intPayload;
+        bool success = m_tableManager.addPlayerToTable(tableID, currentPlayer);
+        if (success)
+        {
+          //broadcast the event to the other people in the table
+          broadcastAction(tableID, currentPlayer, Action::JOIN_Table_Broadcast);
+
+          // send back a success packet
+          GameEvent response;
+          response.action = Action::JOIN_Table_Success;
+          m_sendCallback(client_fd, response);
+        } else {
+          // send back a fail packet
+          GameEvent response;
+          response.stringPayload = "Table " + std::to_string(tableID) + " is full.";
+          response.action = Action::JOIN_Table_Failed;
+          m_sendCallback(client_fd, response);
         }
       }
+    }
+  }
+
+  void broadcastAction(int tableID, Player* player, Action a) // broadcast action to rest of players at a table
+  {
+    //loop through all the people in the table
+    std::vector<Player*> currentPlayers = m_tableManager.getCurrentPlayers(tableID);
+
+    for(int i = 0; i < currentPlayers.size(); i++)
+    {
+      GameEvent event;
+      event.stringPayload = "sent from server";
+      event.action = a;
+      event.senderUUID = player->getUUID();
+      m_sendCallback(currentPlayers[i]->getFD(), event);
     }
   }
 

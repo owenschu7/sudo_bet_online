@@ -9,14 +9,17 @@ enum class Action
   //S2C = server to client
   
   //system events
-  SYS_Connect = 0,
-  SYS_Disconnect,
-  SYS_Connect_Success,
-  SYS_Connect_Failed,
+  SYS_Connect = 0,         //Done
+  SYS_Disconnect,          //D
+  SYS_Connect_Success,     //D
+  SYS_Connect_Failed,      //D
 
-  GET_AvailableTables,     // get a list of all available tables to play at
-  CREATE_Table,            // user create a table
-  JOIN_Table,              // user joins
+  GET_AvailableTables,     //D get a list of all available tables to play at
+  CREATE_Table,            //D user create a table
+  JOIN_Table,              //D user joins
+  JOIN_Table_Broadcast,    //D broadcast to all people in a table that a user joins
+  JOIN_Table_Success,      //D user joins was success
+  JOIN_Table_Failed,       //D user could not join
   JOIN_NET_Table,          // someone has joined the table
   LEAVE_Table,             // user leaves
   LEAVE_NET_Table,         // someone has left the table

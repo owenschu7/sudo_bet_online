@@ -19,7 +19,7 @@ public:
   Player() 
     : m_fd(-1), m_chips(0), m_totalWinnings(0), m_totalLosses(0),
     m_currTableID(-1), m_currBetAmount(0), m_currBetChoice(BetChoice::None),
-    m_isReady(false), m_isAuthenticated(false) 
+    m_isReady(false)
   {
   }
 
@@ -33,8 +33,7 @@ public:
     : m_fd(fd), m_UUID(uuid), m_username(username), m_chips(1000), 
     m_totalWinnings(0), m_totalLosses(0), // <--- FIXED HERE
     m_currTableID(-1), m_currBetAmount(0), 
-    m_currBetChoice(BetChoice::None), m_isReady(false), 
-    m_isAuthenticated(false)
+    m_currBetChoice(BetChoice::None), m_isReady(false)
   {
   }
 
@@ -142,8 +141,6 @@ private:
   BetChoice m_currBetChoice;
   bool m_isReady;
 
-  // Authentication
-  bool m_isAuthenticated;
 };
 
 #endif

@@ -318,7 +318,7 @@ private:
     DEBUG_PRINT << "SENDING EVENT " << event << "\n";
 
     PacketBuilder builder;
-    builder.append8(static_cast<uint8_t>(event.type));
+    builder.append8(static_cast<uint8_t>(event.action));
     builder.appendString(event.senderUUID.c_str());
     builder.appendString(event.senderUsername.c_str()); 
     builder.append32(event.intPayload);

@@ -37,9 +37,9 @@ public:
     PacketParser parser(rawPacket.data(), rawPacket.size());
 
     // 2. READ THE DATA (In the EXACT order the PacketBuilder appended it)
-    event.type           = static_cast<EventType>(parser.read8());
+    event.action         = static_cast<Action>(parser.read8());
     event.senderUUID     = parser.readString();
-    event.senderUsername = parser.readString(); // <-- Updated name
+    event.senderUsername = parser.readString();
     event.intPayload     = parser.read32();
     event.stringPayload  = parser.readString();
 
