@@ -1,6 +1,7 @@
 #pragma once
 #include "Screen.h"
 #include <SFML/Graphics.hpp>
+#include <imgui.h>
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -73,9 +74,14 @@ public:
     }
   }
 
-  void update() override
+  void update(sf::RenderWindow& window) override
   {
     processEventsFromServer();
+
+    ImVec2 rawMouse = ImGui::GetIO().MousePos;
+    sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
+    sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
+
     // Baccarat game logic (dealing cards, checking win conditions) will go here
   }
 

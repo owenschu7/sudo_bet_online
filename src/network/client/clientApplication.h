@@ -132,6 +132,11 @@ private:
       std::cerr << "Failed to load SFML game font!\n";
       exit(-1);
     }
+    if (!m_sharedData.s_gameFontTitle.openFromFile("assets/fonts/monogram-extended-italic.ttf"))
+    {
+      std::cerr << "Failed to load SFML game font!\n";
+      exit(-1);
+    }
   }
 
   //main loop phases
@@ -222,7 +227,7 @@ private:
     handleScreenTransitions(); // changes screens if needed
 
     //update and draw the active screen
-    m_currentScreen->update();
+    m_currentScreen->update(m_window);
 
     drawGlobalDebugUI(); // runs after the screen updates so it draws on top of everything!
   }

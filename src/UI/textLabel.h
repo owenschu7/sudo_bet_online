@@ -56,7 +56,7 @@ struct Label
                 cropRect = sf::IntRect({100, 100}, {88, 28});
                 break;
             case BannerType::Banner3:
-                cropRect = sf::IntRect({0, 100}, {0, 0});  // TODO: fill in your coords
+                cropRect = sf::IntRect({261, 210}, {88, 44});
                 break;
         }
 

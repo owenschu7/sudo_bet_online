@@ -40,54 +40,54 @@ private:
     // Split the payload by the '|' delimiter
     while (std::getline(payloadStream, tableSegment, '|'))
     {
-        // Skip empty segments (like the trailing delimiter)
-        if (tableSegment.empty())
+      // Skip empty segments (like the trailing delimiter)
+      if (tableSegment.empty())
+      {
+        continue;
+      }
+
+      std::stringstream segmentStream(tableSegment);
+      std::string field;
+
+      // Initialize an empty struct
+      GameTableData table; 
+
+      try
+      {
+        // Parse ID
+        if (std::getline(segmentStream, field, ','))
         {
-            continue;
+          table.tableID = std::stoi(field);
+        }
+        // Parse Game Type (requires casting the int back to the Game enum)
+        if (std::getline(segmentStream, field, ','))
+        {
+          table.game = static_cast<Game>(std::stoi(field)); 
+        }
+        // Parse Current Players
+        if (std::getline(segmentStream, field, ','))
+        {
+          table.playerCount = std::stoi(field);
+        }
+        // Parse Max Players
+        if (std::getline(segmentStream, field, ','))
+        {
+          table.maxPlayers = std::stoi(field);
         }
 
-        std::stringstream segmentStream(tableSegment);
-        std::string field;
+        // Note: 'name' and 'players' are not present in the CSV string 
+        // from getAvailableTablesListEvent(), so they remain default-initialized 
+        // (empty string and empty vector).
 
-        // Initialize an empty struct
-        GameTableData table; 
+        parsedTables.push_back(table);
 
-        try
-        {
-            // Parse ID
-            if (std::getline(segmentStream, field, ','))
-            {
-                table.tableID = std::stoi(field);
-            }
-            // Parse Game Type (requires casting the int back to the Game enum)
-            if (std::getline(segmentStream, field, ','))
-            {
-                table.game = static_cast<Game>(std::stoi(field)); 
-            }
-            // Parse Current Players
-            if (std::getline(segmentStream, field, ','))
-            {
-                table.playerCount = std::stoi(field);
-            }
-            // Parse Max Players
-            if (std::getline(segmentStream, field, ','))
-            {
-                table.maxPlayers = std::stoi(field);
-            }
-
-            // Note: 'name' and 'players' are not present in the CSV string 
-            // from getAvailableTablesListEvent(), so they remain default-initialized 
-            // (empty string and empty vector).
-
-            parsedTables.push_back(table);
-
-        } catch (const std::exception& e) {
-            std::cerr << "Error parsing table segment '" << tableSegment << "': " << e.what() << "\n";
-        }
+      } catch (const std::exception& e) {
+        std::cerr << "Error parsing table segment '" << tableSegment << "': " << e.what() << "\n";
+      }
     }
 
     return parsedTables;
-}
+  }
 
 
 
@@ -371,37 +371,30 @@ public:
     }
   }
 
-  void update() override
+  void update(sf::RenderWindow& window) override
   {
-    processEventsFromServer(); // used to actually check if there are any incoming packets in the queue
-
+    processEventsFromServer();
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
     ImGui::SetNextWindowSize(screenSize);
 
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | 
-                                   ImGuiWindowFlags_NoResize | 
-                                   ImGuiWindowFlags_NoMove | 
-                                   ImGuiWindowFlags_NoBackground |
-                                   ImGuiWindowFlags_NoBringToFrontOnFocus; // used so that demo window can display over the screen
+      ImGuiWindowFlags_NoResize | 
+      ImGuiWindowFlags_NoMove | 
+      ImGuiWindowFlags_NoBackground |
+      ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     ImGui::Begin("Table Layer", nullptr, windowFlags);
-    // 1. Define how much vertical space you need for the button + padding
-    float bottomReservedSpace = 100.0f; 
 
+    float bottomReservedSpace = 100.0f; 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-    // 2. Wrap the table in a Child Window. 
-    // ImVec2(0.0f, -bottomReservedSpace) means: 
-    // Width = 0 (Fill width), Height = Fill available height MINUS bottomReservedSpace
+
     ImGui::BeginChild("TableScrollRegion", ImVec2(0.0f, -bottomReservedSpace), false);
     drawTable(screenSize, myTables);
     ImGui::PopStyleColor(1);
     ImGui::EndChild();
 
-    // 3. The cursor is now safely positioned below the child window
-    // Draw your button here, and it will sit cleanly at the bottom
     drawButton_AddTable(screenSize, myTables);
-
     DrawGameSelectionPopup();
 
     ImGui::End();
@@ -430,7 +423,7 @@ public:
   {
     window.draw(tableBackground);
   }
-  
+
   ScreenState getNextState() const override
   {
     return m_nextState;

@@ -5,7 +5,7 @@
 class SettingsScreen : public Screen
 {
 private:
-  
+
   sf::RectangleShape menuBackground;
 
 
@@ -19,7 +19,7 @@ private:
     const char* settingsString = "Settings";
 
     ImVec2 statusSize = ImGui::CalcTextSize(settingsString);
-    
+
     float statusX = (screenSize.x / 2) - (statusSize.x / 2);
     float statusY = (screenSize.y * 0.15f) - (statusSize.y / 2);
 
@@ -36,7 +36,7 @@ private:
     float leftPadding = 60.0f; // More padding to match the image
     float startY = screenSize.y * 0.25f; 
     float labelWidth = 150.0f;  // Space reserved for the "Music", "Sound fx" text
-    
+
     float rightSideStart = screenSize.x - 450.0f;
 
     ImFont* smallFont = ImGui::GetIO().Fonts->Fonts[0]; // Using Small Font
@@ -54,13 +54,13 @@ private:
     ImGui::SetCursorPosX(leftPadding);
     ImGui::Text("Video quality");
     ImGui::SameLine(rightSideStart);
-    
+
     ImGui::Text("Low"); ImGui::SameLine();
     if (ImGui::Checkbox("##low", &m_shared.s_videoLow)) { 
       m_shared.s_videoHigh = !m_shared.s_videoLow; 
       m_shared.s_settingsChanged = true;
     }
-    
+
     ImGui::SameLine();
     ImGui::Text("High"); ImGui::SameLine();
     if (ImGui::Checkbox("##high", &m_shared.s_videoHigh)) { 
@@ -106,7 +106,7 @@ private:
     ImGui::SetCursorPosX(leftPadding);
     ImGui::Text("Light Mode");
     ImGui::SameLine(rightSideStart);
- 
+
     if (ImGui::Checkbox("##on", &m_shared.s_lightMode)) { 
       // This block ONLY runs on the exact frame the user clicks the box
       m_shared.s_settingsChanged = true;
@@ -117,7 +117,7 @@ private:
     ImGui::SetCursorPosX(leftPadding);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.4f, 0.4f, 1.0f)); 
     if (ImGui::Button("Back to Menu", ImVec2(0.0f, backButtonHeight))) {
-        m_nextState = ScreenState::MainMenu;
+      m_nextState = ScreenState::MainMenu;
     }
 
     // Clean up
@@ -154,27 +154,31 @@ public:
       {
         //convent the raw pixel coordinates to window corrdinates
         sf::Vector2f mousePos = window.mapPixelToCoords(mousePressed->position);
-        
+
       }
     }
   }
 
-  void update() override
+  void update(sf::RenderWindow& window) override
   {
+    processEventsFromServer();
+
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
     ImGui::SetNextWindowSize(screenSize);
 
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | 
-                                   ImGuiWindowFlags_NoResize | 
-                                   ImGuiWindowFlags_NoMove | 
-                                   ImGuiWindowFlags_NoBackground |
-                                   ImGuiWindowFlags_NoBringToFrontOnFocus;
+      ImGuiWindowFlags_NoResize | 
+      ImGuiWindowFlags_NoMove | 
+      ImGuiWindowFlags_NoBackground |
+      ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     ImGui::Begin("Settings Layer", nullptr, windowFlags);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
     drawSettingsText(screenSize);
     drawButtons(screenSize);
+
     ImGui::PopStyleColor(1);
     ImGui::End();
   }
@@ -184,7 +188,7 @@ public:
     // draw play button, settings button, background
     window.draw(menuBackground);
   }
-  
+
   ScreenState getNextState() const override
   {
     return m_nextState;

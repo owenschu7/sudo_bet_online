@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <imgui.h>
 #include "../core/SharedData.h"
 
 //an enum to help us switch between screens easily
@@ -32,7 +33,7 @@ public:
 
   // every screen must implement these three functions
   virtual void handleEvent(const sf::Event& event, sf::RenderWindow& window) = 0;
-  virtual void update() = 0;
+  virtual void update(sf::RenderWindow& window) = 0;
   virtual void draw(sf::RenderWindow& window) = 0;
 
   void processEventsFromServer() // every screen will do this

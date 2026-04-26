@@ -267,16 +267,20 @@ public:
     }
   }
 
-  void update() override
+
+  void update(sf::RenderWindow& window) override
   {
-    //check for events sent from the server to the client
     processEventsFromServer();
 
-    // 1. Setup the invisible full-screen window
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
-    ImGui::SetNextWindowSize(screenSize);
 
+    ImVec2 rawMouse = ImGui::GetIO().MousePos;
+    sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
+    sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
+
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImGui::SetNextWindowSize(screenSize);
+    
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | 
                                    ImGuiWindowFlags_NoResize | 
                                    ImGuiWindowFlags_NoMove | 
@@ -285,17 +289,12 @@ public:
 
     ImGui::Begin("Menu Layer", nullptr, windowFlags);
 
-    // 2. Call our neat little helper functions!
     drawServerStatus(screenSize);
     drawTitle(screenSize);
     drawButtons(screenSize);
     drawTopRightUI(screenSize);
-    // will draw username based on 3 conditions 
-    // - new user (prompts for username, then stores it)
-    // - logged in (draws username in corner)
-    DrawUsername(screenSize); 
+    DrawUsername(screenSize);
 
-    // 3. End the window
     ImGui::End();
   }
 

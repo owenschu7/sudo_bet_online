@@ -11,11 +11,15 @@ class StartScreen : public Screen
 {
 private:
   sf::RectangleShape m_menuBackground;
+
   Button m_startButton;
-  Button m_quitButton;
+  Button m_settingsButton;
+  Button m_exitButton;
+
   Label m_gameTitle;
   Label m_usernameDisplay;
   sf::Texture m_buttonSheet;
+  sf::Texture m_gameSheetUI;
 
   void DrawUsernamePopup(ImVec2 screenSize)
   {
@@ -53,7 +57,7 @@ private:
 public:
   StartScreen(SharedData& sharedData)
     : Screen(sharedData),
-    m_gameTitle(sharedData.s_gameFont),
+    m_gameTitle(sharedData.s_gameFontTitle),
     m_usernameDisplay(sharedData.s_gameFont)
   {
     // 1. Background
@@ -63,32 +67,39 @@ public:
     // 2. Load texture sheet
     if (!m_buttonSheet.loadFromFile("assets/images/UIPack/UI assets Demo (2x).png"))
     {
-      DEBUG_PRINT << "ERROR: Could not load assets/ui/buttons.png\n";
+      DEBUG_PRINT << "ERROR: Could not load assets/UIPACK/UI assets Demo (2x).png\n";
+    }
+    if (!m_gameSheetUI.loadFromFile("assets/images/UI/BlackandWhiteUI.png"))
+    {
+      DEBUG_PRINT << "ERROR: Could not load assets/UI/BlackandWhiteUI.png\n";
     }
 
     // 3. Setup buttons
-    float btnScale = 5.0f;
-    sf::IntRect buttonCrop({194, 290}, {92, 30});
+    float btnScale = 10.0f;
+    sf::IntRect startButtonCrop({126, 195}, {54, 17});
+    sf::IntRect settingsButtonCrop({126, 215}, {54, 17});
+    sf::IntRect exitButtonCrop({126, 235}, {54, 17});
 
     // scaledW = how wide the button will actually appear on screen
-    float scaledW = buttonCrop.size.x * btnScale;
+    float scaledW = startButtonCrop.size.x * btnScale;
     float centerX = (UI::SCREEN_W - scaledW) / 2.0f;
-    float startY  = 450.0f;
+    float startY  = 500.0f;
     float spacing = 140.0f;
 
-    m_startButton.setup(m_buttonSheet, buttonCrop, m_shared.s_gameFont, "START", btnScale, {centerX, startY});
-    m_quitButton.setup (m_buttonSheet, buttonCrop, m_shared.s_gameFont, "QUIT",  btnScale, {centerX, startY + spacing});
+    m_startButton.setupNoText(m_gameSheetUI, startButtonCrop, btnScale, {centerX, startY});
+    m_settingsButton.setupNoText(m_gameSheetUI, settingsButtonCrop, btnScale, {centerX, startY + spacing});
+    m_exitButton.setupNoText(m_gameSheetUI, exitButtonCrop, btnScale, {centerX, startY + (spacing * 2)});
 
     // 4. Setup labels
     m_gameTitle.setupWithBanner(
-      "Sudo Bet Online", 
-      120, sf::Color(61,41,54),
+      "Sudo Bet \nOnline", 
+      160, sf::Color::White,
       {UI::SCREEN_W / 2.0f, 250.0f},
       true,
-      m_buttonSheet,
-      BannerType::Banner2,
-      15.0f,
-      {0, -28.0f}
+      m_gameSheetUI,
+      BannerType::Banner3,
+      12.0f,
+      {0, 0.0f}
     );
     m_usernameDisplay.setup("Username: ", 30, sf::Color::White, {30.0f, UI::SCREEN_H - 60.0f}, false);
   }
@@ -111,7 +122,7 @@ public:
       m_nextState = ScreenState::MainMenu;
     }
 
-    if (m_quitButton.isClicked(mousePos, event))
+    if (m_exitButton.isClicked(mousePos, event))
     {
       m_nextState = ScreenState::Quit;
     }
@@ -125,15 +136,17 @@ public:
     }
   }
 
-  void update() override
+  void update(sf::RenderWindow& window) override
   {
     processEventsFromServer();
 
-    ImVec2 rawMouse   = ImGui::GetIO().MousePos;
-    sf::Vector2f mousePos(rawMouse.x, rawMouse.y);
+    ImVec2 rawMouse = ImGui::GetIO().MousePos;
+    sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
+    sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
-    m_startButton.update(mousePos);     // FIX: m_ prefix
-    m_quitButton.update(mousePos);      // FIX: m_ prefix
+    m_startButton.update(mousePos);
+    m_settingsButton.update(mousePos);
+    m_exitButton.update(mousePos);
 
     m_usernameDisplay.setString("Username: " + m_shared.s_currentUsername);
 
@@ -154,10 +167,11 @@ public:
 
   void draw(sf::RenderWindow& window) override
   {
-    window.draw(m_menuBackground);      // FIX: m_ prefix
-    m_gameTitle.draw(window);           // FIX: m_ prefix
-    m_startButton.draw(window);         // FIX: m_ prefix
-    m_quitButton.draw(window);          // FIX: m_ prefix
+    window.draw(m_menuBackground);
+    m_gameTitle.draw(window);
+    m_startButton.draw(window);
+    m_settingsButton.draw(window);
+    m_exitButton.draw(window);
 
     if (!m_shared.s_needUsername)
     {

@@ -14,7 +14,7 @@ public:
         // No custom events needed, ImGui handles the demo window clicks!
     }
 
-    void update() override 
+    void update(sf::RenderWindow& window) override 
     {
         // This spawns the massive ImGui test window
         ImGui::ShowDemoWindow(); 
