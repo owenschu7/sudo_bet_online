@@ -110,22 +110,27 @@ private:
   {
     ImGuiIO& io = ImGui::GetIO();
 
-    // Load the default font (Slot 0)
+    // 1. Load ImGui Fonts
     ImFont* defaultFont = io.Fonts->AddFontFromFileTTF("assets/fonts/8bitOperatorPlus8-Regular.ttf", 20.0f);
     if (!defaultFont) { std::cerr << "Failed to load default font!\n"; exit(-1); }
 
-    // Load the big font (Slot 1)
     ImFont* bigFont = io.Fonts->AddFontFromFileTTF("assets/fonts/8bitOperatorPlus8-Regular.ttf", 70.0f);
     if (!bigFont) { std::cerr << "Failed to load big font!\n"; exit(-1); }
 
-    // Load the title font (Slot 2)
     ImFont* titleButtonFont = io.Fonts->AddFontFromFileTTF("assets/fonts/8bitOperatorPlus8-Regular.ttf", 40.0f);
     if (!titleButtonFont) { std::cerr << "Failed to load title button font!\n"; exit(-1); }
 
-    // CRITICAL: You must tell ImGui-SFML to rebuild the font texture after adding a new font
     if (!ImGui::SFML::UpdateFontTexture()) 
     {
       std::cerr << "Failed to update ImGui font texture!\n";
+    }
+
+    // 2. Load SFML Global Font
+    // We load this into m_sharedData so all screens can use it instantly
+    if (!m_sharedData.s_gameFont.openFromFile("assets/fonts/8bitOperatorPlus8-Regular.ttf"))
+    {
+      std::cerr << "Failed to load SFML game font!\n";
+      exit(-1);
     }
   }
 
@@ -156,15 +161,47 @@ private:
         m_window.close();
       }
 
+//    if (const auto* resized = event->getIf<sf::Event::Resized>())
+//    {
+//      //update the view to match the new window size exactaly
+//      sf::FloatRect visibleArea({0.0f, 0.0f},
+//                                {static_cast<float>(resized->size.x),
+//                                static_cast<float>(resized->size.y)});
+
+//      //tell the window to look through this camera
+//      m_window.setView(sf::View(visibleArea));
+//    }
+
+      // ui screensize handling
       if (const auto* resized = event->getIf<sf::Event::Resized>())
       {
-        //update the view to match the new window size exactaly
-        sf::FloatRect visibleArea({0.0f, 0.0f},
-                                  {static_cast<float>(resized->size.x),
-                                  static_cast<float>(resized->size.y)});
+        // 1. Calculate the aspect ratio of the physical window vs our 1920x1080 game
+        float windowRatio = static_cast<float>(resized->size.x) / static_cast<float>(resized->size.y);
+        float viewRatio = 1920.0f / 1080.0f;
 
-        //tell the window to look through this camera
-        m_window.setView(sf::View(visibleArea));
+        float sizeX = 1.0f;
+        float sizeY = 1.0f;
+        float posX = 0.0f;
+        float posY = 0.0f;
+
+        // 2. Math to figure out if the black bars go on the top/bottom or left/right
+        if (windowRatio >= viewRatio) 
+        {
+            // Window is wider than the game (Black bars on left/right)
+            sizeX = viewRatio / windowRatio;
+            posX = (1.0f - sizeX) / 2.0f;
+        } 
+        else 
+        {
+            // Window is taller than the game (Black bars on top/bottom)
+            sizeY = windowRatio / viewRatio;
+            posY = (1.0f - sizeY) / 2.0f;
+        }
+
+        // 3. Apply the viewport to the camera
+        sf::View view = m_window.getView();
+        view.setViewport(sf::FloatRect({posX, posY}, {sizeX, sizeY}));
+        m_window.setView(view);
       }
 
       // pass the event down to whatever screen is currently active
@@ -403,12 +440,14 @@ private:
     {
       ImGui::Begin("SFML Hover Tracker", &showHoverTracker, ImGuiWindowFlags_AlwaysAutoResize);
 
+      // 1. Get the raw pixel position from ImGui (Monitor Coordinates)
       ImVec2 mousePos = ImGui::GetIO().MousePos;
+      sf::Vector2i pixelPos(static_cast<int>(mousePos.x), static_cast<int>(mousePos.y));
 
-      // Convert ImGui mouse position to SFML Vector2f
-      sf::Vector2f sfMousePos(mousePos.x, mousePos.y);
+      // 2. Convert physical pixels to virtual game coordinates!
+      sf::Vector2f sfMousePos = m_window.mapPixelToCoords(pixelPos);
 
-      // Ask the active screen what we are hovering over!
+      // Ask the active screen what we are hovering over using the fixed coordinates
       std::string hoveredItem = "None";
       if (m_currentScreen)
       {
@@ -420,12 +459,10 @@ private:
 
       if (hoveredItem != "None" && hoveredItem != "Table Background")
       {
-        // Green text if we are hovering over an actual interactable object
         ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "> %s <", hoveredItem.c_str());
       }
       else
       {
-        // Default text for background/nothing
         ImGui::Text("%s", hoveredItem.c_str());
       }
 

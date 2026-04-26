@@ -2,6 +2,9 @@
 #include <SFML/Graphics.hpp>
 #include <imgui.h>
 #include "../core/Debug.h"
+#include "../UI/menuButton.h"
+#include "../UI/textLabel.h"
+#include "../UI/UIHelper.h"
 
 
 class StartScreen : public Screen
@@ -10,79 +13,13 @@ private:
   
   sf::RectangleShape menuBackground;
 
-  // --- UI HELPER METHODS ---
+  Button startButton;
+  Button quitButton;
 
-  void drawTitle(ImVec2 screenSize)
-  {
-    ImFont* titleFont = ImGui::GetIO().Fonts->Fonts[1];
-    ImGui::PushFont(titleFont);
-    const char* titleString = "Sudo Bet Online";
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-    ImVec2 textSize = ImGui::CalcTextSize(titleString);
+  Label gameTitle;
+  Label usernameDisplay;
 
-    float textX = (screenSize.x - textSize.x) * 0.5f;
-    float textY = (screenSize.y - textSize.y) * 0.4f;
-
-    ImGui::SetCursorPos(ImVec2(textX, textY));
-    ImGui::Text("%s", titleString);
-    ImGui::PopFont();
-    ImGui::PopStyleColor();
-  }
-
-  void drawButtons(ImVec2 screenSize)
-  {
-    float buttonWidth = 600.0f;
-    float buttonHeight = 80.0f;
-    float leftPadding = 40.0f;
-    float centerY = screenSize.y * 0.50f; 
-
-    ImFont* titleButtonFont = ImGui::GetIO().Fonts->Fonts[2];
-    ImGui::PushFont(titleButtonFont);
-
-    // Move cursor for the first button
-    ImGui::SetCursorPosX(leftPadding);
-    ImGui::SetCursorPosY(centerY);
-
-    // Push Styles
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(40.0f/255.0f, 150.0f/255.0f, 60.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(60.0f/255.0f, 170.0f/255.0f, 80.0f/255.0f, 1.0f)); 
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(20.0f/255.0f, 130.0f/255.0f, 40.0f/255.0f, 1.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 30.0f)); // adds a space vertically
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-
-    // 2. Pass ImVec2(0.0f, 0.0f) to make the button auto-size to the text width and height
-    // (If you still want them to be chunky 100px tall buttons, use ImVec2(0.0f, 100.0f) instead!)
-    if (ImGui::Button("Start", ImVec2(0.0f, buttonHeight))) 
-    {
-      //connecting to the server
-
-      GameEvent connectEvent;
-      connectEvent.action = Action::SYS_Connect;
-      connectEvent.game = Game::NONE;
-      connectEvent.senderUsername = m_shared.s_currentUsername;
-      connectEvent.senderUUID = m_shared.s_currentUUID;
-      connectEvent.stringPayload = "";
-      m_shared.s_outboundEvents.push(connectEvent);
-      DEBUG_PRINT << connectEvent;
-
-      //mainmenu will handle if connection success or not
-      m_nextState = ScreenState::MainMenu;
-    }
-
-    ImGui::SetCursorPosX(leftPadding);
-    if (ImGui::Button("Quit", ImVec2(0.0f, buttonHeight))) 
-    {
-      m_nextState = ScreenState::Quit;
-    }
-
-    // Pop Styles
-    ImGui::PopStyleColor(4); 
-    ImGui::PopStyleVar(2);  
-    ImGui::PopFont();
-  }
-
-  void DrawUsername(ImVec2 screenSize)
+  void DrawUsernamePopup(ImVec2 screenSize)
   {
     static char usernameBuf[32] = "";
 
@@ -129,44 +66,39 @@ private:
         }
         ImGui::EndPopup();
       }
-    } else {
-      ImFont* defaultFont = ImGui::GetIO().Fonts->Fonts[0];
-      ImGui::PushFont(defaultFont);
-
-      // Combine the label with the actual username 
-      // (Assumes m_shared.s_currentUsername is a std::string or const char*)
-      std::string displayText = "Username: " + m_shared.s_currentUsername;
-
-      // Calculate size based on the complete text
-      ImVec2 textSize = ImGui::CalcTextSize(displayText.c_str());
-
-      float bottomLeftPadding = 20.0f; 
-
-      // Calculate X and Y positions
-      float textX = bottomLeftPadding; 
-      float textY = screenSize.y - textSize.y - bottomLeftPadding; 
-
-      ImGui::SetCursorPos(ImVec2(textX, textY));
-
-      // Push White text color (R: 1.0, G: 1.0, B: 1.0, Alpha: 1.0)
-      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); 
-
-      // Print the final string
-      ImGui::Text("%s", displayText.c_str());
-
-      ImGui::PopStyleColor();
-      ImGui::PopFont();
     }
   }
 
 
 public:
 
-  StartScreen(SharedData &sharedData) : Screen(sharedData)
+  StartScreen(SharedData &sharedData) 
+    : Screen(sharedData),
+      startButton(sharedData.s_gameFont),
+      quitButton(sharedData.s_gameFont),
+      gameTitle(sharedData.s_gameFont),
+      usernameDisplay(sharedData.s_gameFont)
   {
-    //set up a dark blue background for the menu
-    menuBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
+    menuBackground.setSize(sf::Vector2f({UI::SCREEN_W, UI::SCREEN_H}));
     menuBackground.setFillColor(sf::Color(20, 20, 50));
+
+    // --- SETUP LABELS ---
+    // setup(string, size, color, position, isCentered)
+    
+    // Title is Centered (true) at X: 960, Y: 250
+    gameTitle.setup("Sudo Bet Online", 180, sf::Color::White, {UI::SCREEN_W / 2.0f, 250.0f}, true);
+
+    // Username is Left-Aligned (false) in the bottom corner
+    usernameDisplay.setup("Username: ", 30, sf::Color::White, {30.0f, UI::SCREEN_H - 60.0f}, false);
+
+    // --- SETUP BUTTONS ---
+    sf::Vector2f btnSize(500.0f, 100.0f);
+    float centerX = (1920.0f - btnSize.x) / 2.0f; 
+    float startY = 450.0f; 
+    float spacing = 120.0f; 
+
+    startButton.setup("Start", btnSize, {centerX, startY});
+    quitButton.setup("Quit", btnSize, {centerX, startY + spacing});
   }
 
 
@@ -190,9 +122,32 @@ public:
 
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override
   {
+    // Get mouse position and map it to your 1920x1080 view
+    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+    sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
+
+    if (startButton.isClicked(mousePos, event))
+    {
+      GameEvent connectEvent;
+      connectEvent.action = Action::SYS_Connect;
+      connectEvent.game = Game::NONE;
+      connectEvent.senderUsername = m_shared.s_currentUsername;
+      connectEvent.senderUUID = m_shared.s_currentUUID;
+      connectEvent.stringPayload = "";
+      m_shared.s_outboundEvents.push(connectEvent);
+      
+      m_nextState = ScreenState::MainMenu;
+    }
+
+
+    if (quitButton.isClicked(mousePos, event))
+    {
+      m_nextState = ScreenState::Quit;
+    }
+
+    // Existing enter-key fallback
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
-      //pressing "Enter" signals we want to switch to the game state
       if (keyPressed->scancode == sf::Keyboard::Scancode::Enter)
       {
         m_nextState = ScreenState::MainMenu;
@@ -203,6 +158,15 @@ public:
   void update() override
   {
     processEventsFromServer();
+
+    // 1. Give the buttons the mouse position so they highlight when hovered!
+    ImVec2 rawMouse = ImGui::GetIO().MousePos;
+    sf::Vector2f mousePos(rawMouse.x, rawMouse.y); 
+    startButton.update(mousePos);
+    quitButton.update(mousePos);
+
+    // 2. Update the SFML text label with the latest username
+    usernameDisplay.setString("Username: " + m_shared.s_currentUsername);
 
     // 1. Setup the invisible full-screen window
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
@@ -216,21 +180,27 @@ public:
                                    ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     ImGui::Begin("Menu Layer", nullptr, windowFlags);
-
-      // 2. Call our neat little helper functions!
-    drawTitle(screenSize);
-    drawButtons(screenSize);
-
-    DrawUsername(screenSize); 
-
-    // 3. End the window
+    DrawUsernamePopup(screenSize); //should only contain the popup logic for getting a new username
     ImGui::End();
   }
 
   void draw(sf::RenderWindow& window) override
   {
-    // draw play button, settings button, background
+    // draw background
     window.draw(menuBackground);
+
+    //sfml title
+    gameTitle.draw(window);
+
+    //draw the buttons
+    startButton.draw(window);
+    quitButton.draw(window);
+
+    // Only draw the username in the bottom corner if they are done with the popup
+    if (!m_shared.s_needUsername) 
+    {
+      usernameDisplay.draw(window);
+    }
   }
   
   ScreenState getNextState() const override

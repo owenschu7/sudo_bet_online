@@ -64,10 +64,10 @@ namespace UI
 ///
   inline const float CARD_OFFSET_X = 160.0f;
 
-  inline void placeCardInHand(sf::Sprite &sprite, float startX, float baseY, int cardIndex)
+  inline void placeCardInHand(sf::Transformable &object, float startX, float baseY, int cardIndex)
   {
     float calculatedX = startX + (cardIndex * CARD_OFFSET_X); 
-    sprite.setPosition({calculatedX, baseY});
+    object.setPosition({calculatedX, baseY});
   }
 
   // 5. Place All Cards (Updated to use placeCardInHand)

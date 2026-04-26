@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <queue>
+#include <SFML/Graphics.hpp> //for font
 #include "GameEvents.h"
 
 struct SharedData
@@ -18,6 +19,8 @@ struct SharedData
   int s_currentLanguage = 0;
 
   bool s_lightMode = false; // true for lightmode false for dark mode
+  
+  sf::Font s_gameFont;
 
   bool s_needUsername;
   std::string s_currentUUID = "";
