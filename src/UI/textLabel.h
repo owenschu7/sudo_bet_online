@@ -1,61 +1,115 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <string>
+#include <memory>
+
+enum class BannerType
+{
+    Banner1,
+    Banner2,
+    Banner3
+};
 
 struct Label
 {
-  sf::Text textObj;
-  bool isCentered = false;
+    sf::Text textObj;
+    bool isCentered  = false;
+    bool m_hasBanner = false;
 
-  // 1. Constructor: Requires the font immediately (SFML 3 rule!)
-  Label(const sf::Font& font) : textObj(font) {}
+    std::unique_ptr<sf::Sprite> bannerSprite;
 
-  // 2. Setup function to style and position the text
-  void setup(const std::string& text, unsigned int characterSize, sf::Color color, sf::Vector2f pos, bool centerAlign = true)
-  {
-    isCentered = centerAlign;
+    // Constructor: Requires the font immediately (SFML 3 rule!)
+    Label(const sf::Font& font) : textObj(font) {}
 
-    textObj.setString(text);
-    textObj.setCharacterSize(characterSize);
-    textObj.setFillColor(color);
-
-    // Automatically handle the origin math based on alignment
-    recalculateOrigin();
-    
-    textObj.setPosition(pos);
-  }
-
-  // 3. Easy way to update dynamic text (like a typing username!)
-  void setString(const std::string& newText)
-  {
-    textObj.setString(newText);
-    
-    // If the text gets longer or shorter, we MUST recalculate the center!
-    if (isCentered) 
+    // Setup WITHOUT a banner — plain text only
+    void setup(const std::string& text, unsigned int characterSize, sf::Color color,
+               sf::Vector2f pos, bool centerAlign = true)
     {
-      recalculateOrigin();
-    }
-  }
+        m_hasBanner = false;
+        bannerSprite.reset();
 
-  // Helper function to handle the annoying math
-  void recalculateOrigin()
-  {
-    if (isCentered)
-    {
-      sf::FloatRect bounds = textObj.getLocalBounds();
-      // Center the origin perfectly in the middle of the text
-      textObj.setOrigin({bounds.position.x + bounds.size.x / 2.0f, bounds.position.y + bounds.size.y / 2.0f});
+        isCentered = centerAlign;
+        textObj.setString(text);
+        textObj.setCharacterSize(characterSize);
+        textObj.setFillColor(color);
+        recalculateOrigin();
+        textObj.setPosition(pos);
     }
-    else
-    {
-      // Reset to top-left corner
-      textObj.setOrigin({0.0f, 0.0f}); 
-    }
-  }
 
-  // 4. Draw function
-  void draw(sf::RenderWindow& window)
-  {
-    window.draw(textObj);
-  }
+    // Setup WITH a banner
+    // scaleFactor: 1.0 = original size, 2.0 = double, 10.0 = ten times bigger, etc.
+    void setupWithBanner(const std::string& text, unsigned int characterSize, sf::Color color,
+                         sf::Vector2f pos, bool centerAlign,
+                         const sf::Texture& tex, BannerType bannerType, float scaleFactor,
+                         sf::Vector2f textOffset = {0.0f, 0.0f})
+    {
+        m_hasBanner = true;
+
+        // Pick the crop rect based on which banner style you want
+        sf::IntRect cropRect;
+        switch (bannerType)
+        {
+            case BannerType::Banner1:
+                cropRect = sf::IntRect({0, 100}, {96, 26});
+                break;
+            case BannerType::Banner2:
+                cropRect = sf::IntRect({100, 100}, {88, 28});
+                break;
+            case BannerType::Banner3:
+                cropRect = sf::IntRect({0, 100}, {0, 0});  // TODO: fill in your coords
+                break;
+        }
+
+        // Uniform scale — both axes use the same factor so it never stretches
+        bannerSprite = std::make_unique<sf::Sprite>(tex);
+        bannerSprite->setTextureRect(cropRect);
+        bannerSprite->setScale({scaleFactor, scaleFactor});
+
+        // Center the banner on pos
+        bannerSprite->setOrigin({cropRect.size.x / 2.0f, cropRect.size.y / 2.0f});
+        bannerSprite->setPosition(pos);
+
+        // Setup the text on top of the banner
+        isCentered = centerAlign;
+        textObj.setString(text);
+        textObj.setCharacterSize(characterSize);
+        textObj.setFillColor(color);
+        recalculateOrigin();
+        textObj.setPosition({pos.x + textOffset.x, pos.y + textOffset.y});
+    }
+
+    // Easy way to update dynamic text
+    void setString(const std::string& newText)
+    {
+        textObj.setString(newText);
+        if (isCentered)
+        {
+            recalculateOrigin();
+        }
+    }
+
+    void recalculateOrigin()
+    {
+        if (isCentered)
+        {
+            sf::FloatRect bounds = textObj.getLocalBounds();
+            textObj.setOrigin({
+                bounds.position.x + bounds.size.x / 2.0f,
+                bounds.position.y + bounds.size.y / 2.0f
+            });
+        }
+        else
+        {
+            textObj.setOrigin({0.0f, 0.0f});
+        }
+    }
+
+    void draw(sf::RenderWindow& window)
+    {
+        if (m_hasBanner && bannerSprite)
+        {
+            window.draw(*bannerSprite);
+        }
+        window.draw(textObj);
+    }
 };
