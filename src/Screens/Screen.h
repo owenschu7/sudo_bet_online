@@ -10,6 +10,8 @@ enum class ScreenState
   Start,
   Loading,
   MainMenu,
+  Map,
+  Shop,
   Settings,
   Tables,
   Baccarat,

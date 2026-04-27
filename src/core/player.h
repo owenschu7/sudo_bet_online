@@ -68,22 +68,10 @@ public:
     }
   }
 
-  void setReady(bool readyState) 
-  {
-    m_isReady = readyState;
-  }
+  void setReady(bool readyState) { m_isReady = readyState; }
 
-  void setChips(int amount) 
-  {
-    m_chips = amount;
-  }
-
-  void addChips(int amount) 
-  {
-    if (amount > 0) {
-      m_chips += amount;
-    }
-  }
+  void setChips(int amount) { m_chips = amount; }
+  void addChips(int amount) { if (amount > 0) { m_chips += amount; } }
 
   bool removeChips(int amount) 
   {
@@ -140,7 +128,6 @@ private:
   int m_currBetAmount;
   BetChoice m_currBetChoice;
   bool m_isReady;
-
 };
 
 #endif

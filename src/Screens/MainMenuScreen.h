@@ -11,6 +11,8 @@
 class MainMenuScreen : public Screen
 {
 private:
+  Button m_mapButton;
+  Button m_shopButton;
   Button m_joinTablesButton;
   Button m_settingsButton;
   Button m_exitButton;
@@ -247,26 +249,26 @@ public:
 
 
     // 3. Setup buttons
-    float btnScale = 4.0f;
-    sf::IntRect joinTablesButtonCrop({99, 35}, {90, 27});
+    float btnScale = 3.0f;
+    sf::IntRect emptyButtonCrop({99, 35}, {90, 27});
 
     // scaledW = how wide the button will actually appear on screen
-    float scaledW = joinTablesButtonCrop.size.x * btnScale;
+    float scaledW = emptyButtonCrop.size.x * btnScale;
     float centerX = (UI::SCREEN_W - scaledW) / 2.0f;
     float startY  = 550.0f;
-    float spacing = 120.0f;
+    float spacing = 80.0f;
 
     const sf::Texture& uiTex = sharedData.s_assets.getTexture("BlackAndWhiteUI");
     const sf::Font& font = sharedData.s_assets.getFont("gameFont");
 
-    m_joinTablesButton.setup(uiTex, joinTablesButtonCrop, font, "Join Table", btnScale, 60, {centerX, startY});
-    m_settingsButton.setup(uiTex, joinTablesButtonCrop, font, "Settings", btnScale, 40, {centerX, startY + spacing});
-    m_exitButton.setup(uiTex, joinTablesButtonCrop, font, "Exit", btnScale, 40,{centerX, startY + (spacing * 2)});
+    m_mapButton.setup(uiTex, emptyButtonCrop, font, "Map", btnScale, 40, {centerX, startY});
+    m_shopButton.setup(uiTex, emptyButtonCrop, font, "Shop", btnScale, 40, {centerX, (startY + spacing)});
+    m_joinTablesButton.setup(uiTex, emptyButtonCrop, font, "Join Table", btnScale, 40, {centerX, startY + (spacing * 2)});
+    m_settingsButton.setup(uiTex, emptyButtonCrop, font, "Settings", btnScale, 40, {centerX, startY + (spacing * 3)});
+    m_exitButton.setup(uiTex, emptyButtonCrop, font, "Exit", btnScale, 40,{centerX, startY + (spacing * 4)});
 
     //setup labels
     m_usernameDisplay.setup("Username: ", 30, sf::Color::White, {30.0f, UI::SCREEN_H - 60.0f}, false);
-
-
   }
 
   //handle events that came in from server to the client
@@ -289,6 +291,32 @@ public:
 
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override
   {
+    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+    sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
+
+    //mouse clicks on buttons
+    if (m_mapButton.isClicked(mousePos, event))
+    {
+      m_nextState = ScreenState::Map;
+    }
+    if (m_shopButton.isClicked(mousePos, event))
+    {
+      m_nextState = ScreenState::Shop;
+    }
+    if (m_joinTablesButton.isClicked(mousePos, event))
+    {
+      m_nextState = ScreenState::Tables;
+    }
+    if (m_settingsButton.isClicked(mousePos, event))
+    {
+      m_nextState = ScreenState::Settings;
+    }
+    if (m_exitButton.isClicked(mousePos, event))
+    {
+      m_nextState = ScreenState::Quit;
+    }
+
+    //keyboard clicks
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
       //pressing "Enter" signals we want to switch to the game state
@@ -314,6 +342,8 @@ public:
     sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
+    m_mapButton.update(mousePos);
+    m_shopButton.update(mousePos);
     m_joinTablesButton.update(mousePos);
     m_settingsButton.update(mousePos);
     m_exitButton.update(mousePos);
@@ -345,6 +375,8 @@ public:
   {
     // draw play button, settings button, background
     window.draw(menuBackground);
+    m_mapButton.draw(window);
+    m_shopButton.draw(window);
     m_joinTablesButton.draw(window);
     m_settingsButton.draw(window);
     m_exitButton.draw(window);

@@ -37,7 +37,8 @@ public:
   bool loadFont(const std::string& name, const std::string& filename)
   {
     sf::Font font;
-    if (!font.openFromFile(filename)) {
+    if (!font.openFromFile(filename))
+    {
       std::cerr << "Error: Could not load font " << filename << "\n";
       return false;
     }
@@ -53,13 +54,12 @@ public:
   }
 
   // --- BULK LOADERS ---
-  // --- BULK LOADERS ---
   void loadAllCardTextures(const std::string& folderPath)
   {
     const std::string suits = "SHCD";
 
-    for (char suit : suits) {
-
+    for (char suit : suits)
+    {
       // 1. Convert the char to the Capitalized suit word
       std::string suitWord;
       if (suit == 'S') suitWord = "Spades";
@@ -67,8 +67,8 @@ public:
       else if (suit == 'C') suitWord = "Clubs";
       else if (suit == 'D') suitWord = "Diamonds";
 
-      for (int value = 1; value <= 13; ++value) {
-
+      for (int value = 1; value <= 13; ++value)
+      {
         // 2. Convert the number to the single uppercase rank letter
         std::string rankWord;
         if (value == 1) rankWord = "A";

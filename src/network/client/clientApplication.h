@@ -15,6 +15,8 @@
 #include "../../Screens/SettingsScreen.h"
 #include "../../Screens/demoScreen.h"
 #include "../../Screens/availableTablesScreens.h"
+#include "../../Screens/MapScreen.h"
+#include "../../Screens/ShopScreen.h"
 
 #include "../../network/client/NetworkClient.h"
 #include "../../network/PacketParser.h"
@@ -363,6 +365,10 @@ private:
           m_currentScreen = std::make_unique<StartScreen>(m_sharedData); break;
         case ScreenState::MainMenu:
           m_currentScreen = std::make_unique<MainMenuScreen>(m_sharedData); break;
+        case ScreenState::Map:
+          m_currentScreen = std::make_unique<MapScreen>(m_sharedData); break;
+        case ScreenState::Shop:
+          m_currentScreen = std::make_unique<ShopScreen>(m_sharedData); break;
         case ScreenState::Settings:
           m_currentScreen = std::make_unique<SettingsScreen>(m_sharedData); break;
         case ScreenState::Tables:
@@ -377,6 +383,8 @@ private:
       }
     }
   }
+
+
   void applySettingsChanges()
   {
     if (m_sharedData.s_settingsChanged)
