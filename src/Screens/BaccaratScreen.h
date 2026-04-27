@@ -15,12 +15,12 @@
 // to keep the tab elements bundled together
 struct PlayerTab
 {
-  PlayerHUD hud; 
+  PlayerHUD hud;
   sf::FloatRect bounds; // Used for mouse hover detection
   bool isEmpty;
 
-  PlayerTab(const sf::Font& font, const sf::Texture& hudTex, const Player& player, sf::Vector2f hudPos)
-    : hud(player, hudTex, font, hudPos),
+  PlayerTab(const sf::Font& usernameFont, const sf::Font& coinsFont, const sf::Texture& hudTex, const Player& player, sf::Vector2f hudPos)
+    : hud(player, hudTex, usernameFont, coinsFont, hudPos),
       bounds(hudPos, sf::Vector2f(PlayerHUD::WIDTH, PlayerHUD::HEIGHT)), 
       isEmpty(true)
   {}
@@ -147,6 +147,7 @@ public:
     
     // Fetch Font and HUD Background Texture once for the loop
     const sf::Font& font = sharedData.s_assets.getFont("gameFont");
+    const sf::Font& coinsFont = sharedData.s_assets.getFont("gameNumbersFont");
     const sf::Texture& hudTex = sharedData.s_assets.getTexture("HUD_Coin");
 
     for (int i = 0; i < numTabs; ++i)
@@ -155,10 +156,11 @@ public:
       float hudX = tabX + (tabSize.x / 2.f) - (PlayerHUD::WIDTH / 2.f); 
       float hudY = startY;
 
-      playerTabs.emplace_back(font, hudTex, m_emptyPlayer, sf::Vector2f{hudX, hudY});
+      // this is where we create the PlayerHUD objects at
+      playerTabs.emplace_back(font, coinsFont, hudTex, m_emptyPlayer, sf::Vector2f{hudX, hudY});
     }
 
-    playerTabs[0].hud.setPlayer(&sharedData.s_localPlayer);
+    playerTabs[0].hud.setPlayer(&sharedData.s_testPlayer);
     playerTabs[0].isEmpty = false; 
   }
 

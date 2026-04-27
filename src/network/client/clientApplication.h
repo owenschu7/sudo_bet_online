@@ -146,6 +146,11 @@ private:
       std::cerr << "Failed to load SFML title font via AssetManager!\n";
       exit(-1);
     }
+    if (!m_sharedData.s_assets.loadFont("gameNumbersFont", "assets/fonts/PixelBlock.ttf"))
+    {
+      std::cerr << "Failed to load SFML title font via AssetManager!\n";
+      exit(-1);
+    }
 
     // 3. Load UI Textures using the AssetManager
     if (!m_sharedData.s_assets.loadTexture("HUD_Coin", "assets/images/UI/playerHUDCoin.png"))

@@ -28,6 +28,7 @@ struct SharedData
   
   //Player
   Player s_localPlayer;
+  Player s_testPlayer = Player(6, "123", "owenschu8");
 
   bool s_needUsername;
   std::string s_currentUUID = "";
