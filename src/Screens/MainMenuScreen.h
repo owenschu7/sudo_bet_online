@@ -2,12 +2,20 @@
 #include <SFML/Graphics.hpp>
 #include <imgui.h>
 #include "../core/Debug.h"
+#include "../UI/menuButton.h"
+#include "../UI/textLabel.h"
+#include "../UI/UIHelper.h"
 
 #include "../core/GameEvents.h"
 
 class MainMenuScreen : public Screen
 {
 private:
+  Button m_joinTablesButton;
+  Button m_settingsButton;
+  Button m_exitButton;
+
+  Label m_usernameDisplay;
 
   sf::RectangleShape menuBackground;
 
@@ -230,11 +238,35 @@ private:
 
 
 public:
-  MainMenuScreen(SharedData &sharedData) : Screen(sharedData)
+  MainMenuScreen(SharedData &sharedData)
+    : Screen(sharedData), m_usernameDisplay(sharedData.s_assets.getFont("gameFont"))
   {
     //set up a dark blue background for the menu
     menuBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
     menuBackground.setFillColor(sf::Color(20, 20, 50));
+
+
+    // 3. Setup buttons
+    float btnScale = 4.0f;
+    sf::IntRect joinTablesButtonCrop({99, 35}, {90, 27});
+
+    // scaledW = how wide the button will actually appear on screen
+    float scaledW = joinTablesButtonCrop.size.x * btnScale;
+    float centerX = (UI::SCREEN_W - scaledW) / 2.0f;
+    float startY  = 550.0f;
+    float spacing = 120.0f;
+
+    const sf::Texture& uiTex = sharedData.s_assets.getTexture("BlackAndWhiteUI");
+    const sf::Font& font = sharedData.s_assets.getFont("gameFont");
+
+    m_joinTablesButton.setup(uiTex, joinTablesButtonCrop, font, "Join Table", btnScale, 60, {centerX, startY});
+    m_settingsButton.setup(uiTex, joinTablesButtonCrop, font, "Settings", btnScale, 40, {centerX, startY + spacing});
+    m_exitButton.setup(uiTex, joinTablesButtonCrop, font, "Exit", btnScale, 40,{centerX, startY + (spacing * 2)});
+
+    //setup labels
+    m_usernameDisplay.setup("Username: ", 30, sf::Color::White, {30.0f, UI::SCREEN_H - 60.0f}, false);
+
+
   }
 
   //handle events that came in from server to the client
@@ -264,6 +296,10 @@ public:
       {
         m_nextState = ScreenState::Baccarat;
       }
+      if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
+      {
+        m_nextState = ScreenState::Start;
+      }
     }
   }
 
@@ -278,6 +314,13 @@ public:
     sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
+    m_joinTablesButton.update(mousePos);
+    m_settingsButton.update(mousePos);
+    m_exitButton.update(mousePos);
+
+    m_usernameDisplay.setString("Username: " + m_shared.s_currentUsername);
+
+
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImGui::SetNextWindowSize(screenSize);
     
@@ -291,7 +334,7 @@ public:
 
     drawServerStatus(screenSize);
     drawTitle(screenSize);
-    drawButtons(screenSize);
+    //drawButtons(screenSize);
     drawTopRightUI(screenSize);
     DrawUsername(screenSize);
 
@@ -302,6 +345,14 @@ public:
   {
     // draw play button, settings button, background
     window.draw(menuBackground);
+    m_joinTablesButton.draw(window);
+    m_settingsButton.draw(window);
+    m_exitButton.draw(window);
+
+    if (!m_shared.s_needUsername)
+    {
+      m_usernameDisplay.draw(window);
+    }
   }
   
   ScreenState getNextState() const override

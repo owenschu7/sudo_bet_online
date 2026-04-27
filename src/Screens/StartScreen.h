@@ -57,25 +57,15 @@ private:
 public:
   StartScreen(SharedData& sharedData)
     : Screen(sharedData),
-    m_gameTitle(sharedData.s_gameFontTitle),
-    m_usernameDisplay(sharedData.s_gameFont)
+    m_gameTitle(sharedData.s_assets.getFont("gameFontTitle")),
+    m_usernameDisplay(sharedData.s_assets.getFont("gameFont"))
   {
     // 1. Background
     m_menuBackground.setSize({UI::SCREEN_W, UI::SCREEN_H});
     m_menuBackground.setFillColor(sf::Color(20, 20, 50));
 
-    // 2. Load texture sheet
-    if (!m_buttonSheet.loadFromFile("assets/images/UIPack/UI assets Demo (2x).png"))
-    {
-      DEBUG_PRINT << "ERROR: Could not load assets/UIPACK/UI assets Demo (2x).png\n";
-    }
-    if (!m_gameSheetUI.loadFromFile("assets/images/UI/BlackandWhiteUI.png"))
-    {
-      DEBUG_PRINT << "ERROR: Could not load assets/UI/BlackandWhiteUI.png\n";
-    }
-
     // 3. Setup buttons
-    float btnScale = 10.0f;
+    float btnScale = 8.0f;
     sf::IntRect startButtonCrop({126, 195}, {54, 17});
     sf::IntRect settingsButtonCrop({126, 215}, {54, 17});
     sf::IntRect exitButtonCrop({126, 235}, {54, 17});
@@ -83,23 +73,25 @@ public:
     // scaledW = how wide the button will actually appear on screen
     float scaledW = startButtonCrop.size.x * btnScale;
     float centerX = (UI::SCREEN_W - scaledW) / 2.0f;
-    float startY  = 500.0f;
-    float spacing = 140.0f;
+    float startY  = 580.0f;
+    float spacing = 155.0f;
 
-    m_startButton.setupNoText(m_gameSheetUI, startButtonCrop, btnScale, {centerX, startY});
-    m_settingsButton.setupNoText(m_gameSheetUI, settingsButtonCrop, btnScale, {centerX, startY + spacing});
-    m_exitButton.setupNoText(m_gameSheetUI, exitButtonCrop, btnScale, {centerX, startY + (spacing * 2)});
+    const sf::Texture& uiTexture = sharedData.s_assets.getTexture("BlackAndWhiteUI");
+
+    m_startButton.setupNoText(uiTexture, startButtonCrop, btnScale, {centerX, startY});
+    m_settingsButton.setupNoText(uiTexture, settingsButtonCrop, btnScale, {centerX, startY + spacing});
+    m_exitButton.setupNoText(uiTexture, exitButtonCrop, btnScale, {centerX, startY + (spacing * 2)});
 
     // 4. Setup labels
     m_gameTitle.setupWithBanner(
       "Sudo Bet \nOnline", 
-      160, sf::Color::White,
-      {UI::SCREEN_W / 2.0f, 250.0f},
+      220, sf::Color::White,
+      {UI::SCREEN_W / 2.0f, 320.0f},
       true,
-      m_gameSheetUI,
+      uiTexture,
       BannerType::Banner3,
-      12.0f,
-      {0, 0.0f}
+      11.0f,
+      {0.0f, 0.0f}
     );
     m_usernameDisplay.setup("Username: ", 30, sf::Color::White, {30.0f, UI::SCREEN_H - 60.0f}, false);
   }
@@ -109,11 +101,11 @@ public:
     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
-    if (m_startButton.isClicked(mousePos, event))   // FIX: m_ prefix
+    if (m_startButton.isClicked(mousePos, event))
     {
       GameEvent connectEvent;
       connectEvent.action         = Action::SYS_Connect;
-      connectEvent.game           = Game::NONE;   // FIX: plain member access
+      connectEvent.game           = Game::NONE;
       connectEvent.senderUsername = m_shared.s_currentUsername;
       connectEvent.senderUUID     = m_shared.s_currentUUID;
       connectEvent.stringPayload  = "";
@@ -175,7 +167,7 @@ public:
 
     if (!m_shared.s_needUsername)
     {
-      m_usernameDisplay.draw(window); // FIX: m_ prefix
+      m_usernameDisplay.draw(window);
     }
   }
 

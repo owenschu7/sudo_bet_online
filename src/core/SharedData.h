@@ -3,6 +3,9 @@
 #include <queue>
 #include <SFML/Graphics.hpp> //for font
 #include "GameEvents.h"
+#include "player.h"
+#include "AssetManager.h"
+
 
 struct SharedData
 {
@@ -20,8 +23,11 @@ struct SharedData
 
   bool s_lightMode = false; // true for lightmode false for dark mode
   
-  sf::Font s_gameFont;
-  sf::Font s_gameFontTitle;
+  //ASSET MANAGER
+  AssetManager s_assets;
+  
+  //Player
+  Player s_localPlayer;
 
   bool s_needUsername;
   std::string s_currentUUID = "";

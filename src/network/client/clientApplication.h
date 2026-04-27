@@ -31,7 +31,7 @@ public:
     initWindow();
     initImGui();
     initData();
-    loadFonts();
+    loadAssets();
 
     //load the main menu
     //currentScreen will hold the current screen we are on (main menu, game screen, settings menu etc)
@@ -81,7 +81,8 @@ private:
       std::cerr << "Initialization failed! We can't safely use ImGui.\n";
       exit(-1);
     }
-
+    // Stop ImGui from overriding our custom SFML cursor
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
   }
 
   void initData()
@@ -97,8 +98,10 @@ private:
       m_settings.Save(m_sharedData);
       m_sharedData.s_needUsername = true;
     }
-    else
+    if (m_sharedData.s_currentUsername.empty())
     {
+      m_sharedData.s_needUsername = true;
+    } else {
       m_sharedData.s_needUsername = false;
     }
 
@@ -106,7 +109,7 @@ private:
     m_sharedData.s_settingsChanged = true;
   }
 
-  void loadFonts() 
+  void loadAssets() 
   {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -125,18 +128,52 @@ private:
       std::cerr << "Failed to update ImGui font texture!\n";
     }
 
+
+    // Inside clientApplication::loadAssets()
+    m_sharedData.s_assets.loadTexture("UIDemo", "assets/images/UIPack/UI assets Demo (2x).png");
+    m_sharedData.s_assets.loadTexture("BlackAndWhiteUI", "assets/images/UI/BlackandWhiteUI.png");
+
+
     // 2. Load SFML Global Font
     // We load this into m_sharedData so all screens can use it instantly
-    if (!m_sharedData.s_gameFont.openFromFile("assets/fonts/8bitOperatorPlus8-Regular.ttf"))
+    if (!m_sharedData.s_assets.loadFont("gameFont", "assets/fonts/8bitOperatorPlus8-Regular.ttf"))
     {
-      std::cerr << "Failed to load SFML game font!\n";
+      std::cerr << "Failed to load SFML game font via AssetManager!\n";
       exit(-1);
     }
-    if (!m_sharedData.s_gameFontTitle.openFromFile("assets/fonts/monogram-extended-italic.ttf"))
+    if (!m_sharedData.s_assets.loadFont("gameFontTitle", "assets/fonts/monogram-extended-italic.ttf"))
     {
-      std::cerr << "Failed to load SFML game font!\n";
+      std::cerr << "Failed to load SFML title font via AssetManager!\n";
       exit(-1);
     }
+
+    // 3. Load UI Textures using the AssetManager
+    if (!m_sharedData.s_assets.loadTexture("HUD_Coin", "assets/images/UI/playerHUDCoin.png"))
+    {
+      std::cerr << "Failed to load HUD texture via AssetManager!\n";
+    }
+
+    sf::Image cursorImage;
+    if (!cursorImage.loadFromFile("assets/images/UI/cursor.png"))
+    {
+      std::cerr << "Failed to load cursor image!\n";
+    }
+
+    m_cursor = sf::Cursor::createFromPixels(
+      cursorImage.getPixelsPtr(),   // raw RGBA pixel array
+      cursorImage.getSize(),        // sf::Vector2u size
+      sf::Vector2u(0, 0)           // hotspot
+    );
+
+    if (m_cursor.has_value())
+    {
+      m_window.setMouseCursor(m_cursor.value());
+    }
+    else
+    {
+      std::cerr << "Failed to create cursor!\n";
+    }
+    m_sharedData.s_assets.loadAllCardTextures("assets/images/Cards2/");
   }
 
   //main loop phases
@@ -509,6 +546,9 @@ private:
   SharedData m_sharedData;
   SettingsManager m_settings;
   NetworkClient m_network;
+
+  //cursor
+  std::optional<sf::Cursor> m_cursor;
 
   //state machine
   std::unique_ptr<Screen> m_currentScreen;

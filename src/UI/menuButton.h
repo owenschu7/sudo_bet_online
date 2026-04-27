@@ -18,7 +18,7 @@ struct Button
   Button() {}
 
   void setup(const sf::Texture& tex, sf::IntRect textureRect, const sf::Font& font, 
-             const std::string& text, float scaleFactor, sf::Vector2f pos)
+             const std::string& text, float scaleFactor, unsigned int charSize, sf::Vector2f pos)
   {
     hasText = true;
     // 1. Create the objects now that we have the Texture and Font
@@ -37,7 +37,7 @@ struct Button
 
     // 3. Configure Text
     label->setString(text);
-    label->setCharacterSize(40);
+    label->setCharacterSize(charSize);  // <-- use it here
     label->setFillColor(sf::Color::White);
 
     // Center text math
