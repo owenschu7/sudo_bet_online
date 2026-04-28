@@ -9,7 +9,7 @@ using namespace std;
 
 Deck::Deck(int num_of_decks)
 {
-    char suits[] = {'s', 'd', 'h', 'c'}; // s spades, d diamonds, h hearts, c clubs, each suit is mapped to a number
+    char suits[] = {'S', 'D', 'H', 'C'}; // s spades, d diamonds, h hearts, c clubs, each suit is mapped to a number
     //create a deck that has (num_of_decks) number of decks
     m_length = num_of_decks * 52;
     for (int i = 0; i < num_of_decks; i++)

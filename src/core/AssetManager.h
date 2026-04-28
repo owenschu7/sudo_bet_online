@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 
+
 class AssetManager
 {
 private:
@@ -53,42 +54,67 @@ public:
     throw std::runtime_error("Font not found: " + name);
   }
 
-  // --- BULK LOADERS ---
+  // --- BULK LOADERS --- //assets/images/Cards/
   void loadAllCardTextures(const std::string& folderPath)
   {
-    const std::string suits = "SHCD";
+    loadTexture("2D", folderPath + "cardDiamonds2.png");
+    loadTexture("3D", folderPath + "cardDiamonds3.png");
+    loadTexture("4D", folderPath + "cardDiamonds4.png");
+    loadTexture("5D", folderPath + "cardDiamonds5.png");
+    loadTexture("6D", folderPath + "cardDiamonds6.png");
+    loadTexture("7D", folderPath + "cardDiamonds7.png");
+    loadTexture("8D", folderPath + "cardDiamonds8.png");
+    loadTexture("9D", folderPath + "cardDiamonds9.png");
+    loadTexture("10D", folderPath + "cardDiamonds10.png");
+    loadTexture("AD", folderPath + "cardDiamondsA.png");
+    loadTexture("JD", folderPath + "cardDiamondsJ.png");
+    loadTexture("QD", folderPath + "cardDiamondsQ.png");
+    loadTexture("KD", folderPath + "cardDiamondsK.png");
 
-    for (char suit : suits)
-    {
-      // 1. Convert the char to the Capitalized suit word
-      std::string suitWord;
-      if (suit == 'S') suitWord = "Spades";
-      else if (suit == 'H') suitWord = "Hearts";
-      else if (suit == 'C') suitWord = "Clubs";
-      else if (suit == 'D') suitWord = "Diamonds";
+    loadTexture("2H", folderPath + "cardHearts2.png");
+    loadTexture("3H", folderPath + "cardHearts3.png");
+    loadTexture("4H", folderPath + "cardHearts4.png");
+    loadTexture("5H", folderPath + "cardHearts5.png");
+    loadTexture("6H", folderPath + "cardHearts6.png");
+    loadTexture("7H", folderPath + "cardHearts7.png");
+    loadTexture("8H", folderPath + "cardHearts8.png");
+    loadTexture("9H", folderPath + "cardHearts9.png");
+    loadTexture("10H", folderPath + "cardHearts10.png");
+    loadTexture("JH", folderPath + "cardHeartsJ.png");
+    loadTexture("QH", folderPath + "cardHeartsQ.png");
+    loadTexture("KH", folderPath + "cardHeartsK.png");
+    loadTexture("AH", folderPath + "cardHeartsA.png");
 
-      for (int value = 1; value <= 13; ++value)
-      {
-        // 2. Convert the number to the single uppercase rank letter
-        std::string rankWord;
-        if (value == 1) rankWord = "A";
-        else if (value == 11) rankWord = "J";
-        else if (value == 12) rankWord = "Q";
-        else if (value == 13) rankWord = "K";
-        else rankWord = std::to_string(value); // 2 through 10 stay numbers
+    loadTexture("2C", folderPath + "cardClubs2.png");
+    loadTexture("3C", folderPath + "cardClubs3.png");
+    loadTexture("4C", folderPath + "cardClubs4.png");
+    loadTexture("5C", folderPath + "cardClubs5.png");
+    loadTexture("6C", folderPath + "cardClubs6.png");
+    loadTexture("7C", folderPath + "cardClubs7.png");
+    loadTexture("8C", folderPath + "cardClubs8.png");
+    loadTexture("9C", folderPath + "cardClubs9.png");
+    loadTexture("10C", folderPath + "cardClubs10.png");
+    loadTexture("JC", folderPath + "cardClubsJ.png");
+    loadTexture("QC", folderPath + "cardClubsQ.png");
+    loadTexture("KC", folderPath + "cardClubsK.png");
+    loadTexture("AC", folderPath + "cardClubsA.png");
 
-        // 3. Keep the original short key for your game logic (e.g., "1H", "11S")
-        std::string key = std::to_string(value) + suit;
-
-        // 4. Build the actual file name string (e.g., "cardSpadesJ.png" or "cardHearts9.png")
-        std::string filename = folderPath + "card" + suitWord + rankWord + ".png";
-
-        loadTexture(key, filename);
-      }
-    }
+    loadTexture("2S", folderPath + "cardSpades2.png");
+    loadTexture("3S", folderPath + "cardSpades3.png");
+    loadTexture("4S", folderPath + "cardSpades4.png");
+    loadTexture("5S", folderPath + "cardSpades5.png");
+    loadTexture("6S", folderPath + "cardSpades6.png");
+    loadTexture("7S", folderPath + "cardSpades7.png");
+    loadTexture("8S", folderPath + "cardSpades8.png");
+    loadTexture("9S", folderPath + "cardSpades9.png");
+    loadTexture("10S", folderPath + "cardSpades10.png");
+    loadTexture("JS", folderPath + "cardSpadesJ.png");
+    loadTexture("QS", folderPath + "cardSpadesQ.png");
+    loadTexture("KS", folderPath + "cardSpadesK.png");
+    loadTexture("AS", folderPath + "cardSpadesA.png");
 
     // Don't forget to check what the back of the card is named in your new asset pack!
     // You might need to change "card_back_blue.png" to match the new file.
-    loadTexture("cardBack", folderPath + "cardBack_red1.png");
+    loadTexture("cardBack", folderPath + "cardBack_blue1.png");
   }
 };

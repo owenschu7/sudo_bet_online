@@ -7,6 +7,10 @@
 #include <iostream>
 #include "../UI/UIHelper.h"
 
+#include "../logic/card.h"
+#include "../UI/CardSprite.h"
+
+
 class GameScreen : public Screen
 {
 private:
@@ -15,11 +19,8 @@ private:
   //things go here
   sf::RectangleShape tableBackground;
 
-  // for the back of the card texture
-  sf::Texture cardBackTexture;
-
   //holds all the cards being displayed
-  std::vector<std::unique_ptr<sf::Sprite>> cards;
+  std::vector<CardSprite> m_cardSprites;
 
   //outline to hold the buttons
   sf::RectangleShape betZone;
@@ -33,24 +34,18 @@ public:
     tableBackground.setFillColor(sf::Color(35,107,43)); //casino green
 
 
-    //load the image
-    if (!cardBackTexture.loadFromFile("assets/images/Cards/card_back_blue.png"))
+    Card testCard = Card(5, 's');
+
+    // Cards should live in SharedData, not locally
+    for (int i = 0; i < 6; ++i)
     {
-      std::cerr << "Failed to load card back image!\n";
+      CardSprite cs(testCard, sharedData.s_assets);
+      UI::centerOrigin(cs.getSFMLSprite());
+      m_cardSprites.emplace_back(std::move(cs));
     }
 
+    UI::placeAllCards(m_cardSprites, 300.0f);
 
-    //cards
-    for (int i = 0; i < 6; ++i) 
-    {
-      auto newCard = std::make_unique<sf::Sprite>(cardBackTexture);
-      UI::centerOrigin(*newCard);
-      // std::move transfers ownership of the unique_ptr into the vector
-      cards.push_back(std::move(newCard)); 
-    }
-    UI::placeAllCards(cards, 300.0f);
-
-    // Big Betting Zone Outline (Now with a dark green background)
     betZone.setSize({500.0f, 500.0f});
     // A nice dark casino green (RGB: 20, 80, 25)
     betZone.setFillColor(sf::Color(20, 80, 25)); 
@@ -74,7 +69,7 @@ public:
     }
   }
 
-  void update(sf::RenderWindow& window) override
+  void update(sf::RenderWindow& window, sf::Time dt) override
   {
     processEventsFromServer();
 
@@ -94,9 +89,9 @@ public:
     window.draw(betZone); // The main outline
 
     //cards
-    for (const std::unique_ptr<sf::Sprite>& card : cards)
+    for (auto& card : m_cardSprites)
     {
-      window.draw(*card);
+      card.draw(window);
     }
   }
   

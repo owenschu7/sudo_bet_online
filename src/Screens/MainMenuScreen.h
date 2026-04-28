@@ -5,6 +5,7 @@
 #include "../UI/menuButton.h"
 #include "../UI/textLabel.h"
 #include "../UI/UIHelper.h"
+#include "../UI/background/ParallaxBackground.h"
 
 #include "../core/GameEvents.h"
 
@@ -16,6 +17,10 @@ private:
   Button m_joinTablesButton;
   Button m_settingsButton;
   Button m_exitButton;
+
+  //parallax background
+  ParallaxBackground m_parallax;
+  sf::Clock m_screenClock; // local clock to handle smooth scrolling
 
   Label m_usernameDisplay;
 
@@ -247,6 +252,16 @@ public:
     menuBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
     menuBackground.setFillColor(sf::Color(20, 20, 50));
 
+    // 1. Get a reference to one of the textures to check its size
+    const sf::Texture& skyTex = sharedData.s_assets.getTexture("starsBackground");
+
+    // 2. Calculate the exact scale needed to make the image 1080 pixels tall.
+    // For example, if the image is 360px tall: 1080 / 360 = scale of 3.0f
+    float bgScale = 1080.0f / static_cast<float>(skyTex.getSize().y);
+
+    // 3. Pass that scale into addLayer!
+    m_parallax.addLayer(sharedData.s_assets.getTexture("starsBackground"), 5.0f, bgScale);
+    m_parallax.addLayer(sharedData.s_assets.getTexture("cloudsBackground"), 20.0f, bgScale);
 
     // 3. Setup buttons
     float btnScale = 3.0f;
@@ -332,9 +347,11 @@ public:
   }
 
 
-  void update(sf::RenderWindow& window) override
+  void update(sf::RenderWindow& window, sf::Time dt) override
   {
     processEventsFromServer();
+
+    m_parallax.update(dt);
 
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
 
@@ -373,8 +390,10 @@ public:
 
   void draw(sf::RenderWindow& window) override
   {
-    // draw play button, settings button, background
-    window.draw(menuBackground);
+    m_parallax.draw(window); // draw background first
+
+    // draw play button, settings button
+    //window.draw(menuBackground);
     m_mapButton.draw(window);
     m_shopButton.draw(window);
     m_joinTablesButton.draw(window);

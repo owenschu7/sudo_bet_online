@@ -6,12 +6,16 @@
 #include "../UI/menuButton.h"
 #include "../UI/textLabel.h"
 #include "../UI/UIHelper.h"
+#include "../UI/background/ParallaxBackground.h"
 
 class StartScreen : public Screen
 {
 private:
   sf::RectangleShape m_menuBackground;
 
+  ParallaxBackground m_parallax;
+  sf::Clock m_screenClock; // local clock to handle smooth scrolling
+  
   Button m_startButton;
   Button m_settingsButton;
   Button m_exitButton;
@@ -63,6 +67,21 @@ public:
     // 1. Background
     m_menuBackground.setSize({UI::SCREEN_W, UI::SCREEN_H});
     m_menuBackground.setFillColor(sf::Color(20, 20, 50));
+
+    //PARALLAX BACKGROUND
+    // 1. Get a reference to one of the textures to check its size
+    const sf::Texture& skyTex = sharedData.s_assets.getTexture("cityBackground_sky");
+
+    // 2. Calculate the exact scale needed to make the image 1080 pixels tall.
+    // For example, if the image is 360px tall: 1080 / 360 = scale of 3.0f
+    float bgScale = 1080.0f / static_cast<float>(skyTex.getSize().y);
+
+    m_parallax.addLayer(sharedData.s_assets.getTexture("cityBackground_sky"), 5.0f, bgScale);
+    m_parallax.addLayer(sharedData.s_assets.getTexture("cityBackground_far"), 20.0f, bgScale);
+    m_parallax.addLayer(sharedData.s_assets.getTexture("cityBackground_mid"), 50.0f, bgScale);
+    m_parallax.addLayer(sharedData.s_assets.getTexture("cityBackground_close"), 100.0f, bgScale);
+    m_parallax.addLayer(sharedData.s_assets.getTexture("cityBackground_front"), 200.0f, bgScale);
+    //PARALLAX BACKGROUND END
 
     // 3. Setup buttons
     float btnScale = 8.0f;
@@ -128,9 +147,12 @@ public:
     }
   }
 
-  void update(sf::RenderWindow& window) override
+  void update(sf::RenderWindow& window, sf::Time dt) override
   {
     processEventsFromServer();
+
+    m_parallax.update(dt);
+
 
     ImVec2 rawMouse = ImGui::GetIO().MousePos;
     sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
@@ -159,7 +181,8 @@ public:
 
   void draw(sf::RenderWindow& window) override
   {
-    window.draw(m_menuBackground);
+    m_parallax.draw(window); // draw background first
+    //window.draw(m_menuBackground);
     m_gameTitle.draw(window);
     m_startButton.draw(window);
     m_settingsButton.draw(window);

@@ -26,6 +26,10 @@ public:
 
   void print_card();
 
+  std::string getTextureKey() const;
+
+
+
 private:
   int m_value;
   char m_suit;

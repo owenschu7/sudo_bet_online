@@ -62,7 +62,7 @@ public:
   }
 
 
-  void update(sf::RenderWindow& window) override
+  void update(sf::RenderWindow& window, sf::Time dt) override
   {
     processEventsFromServer();
 

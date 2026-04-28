@@ -371,7 +371,7 @@ public:
     }
   }
 
-  void update(sf::RenderWindow& window) override
+  void update(sf::RenderWindow& window, sf::Time dt) override
   {
     processEventsFromServer();
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));

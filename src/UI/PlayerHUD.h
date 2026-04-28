@@ -14,11 +14,11 @@ public:
   static constexpr float WIDTH       = SPRITE_W * SCALE;  // rendered width
   static constexpr float HEIGHT      = SPRITE_H * SCALE;  // rendered height
   static constexpr float TEXT_SIZE   = 48u;
-  static constexpr float COINFONT_SIZE   = 48u;
+  static constexpr float COINFONT_SIZE   = 24u;
   // text offsets relative to top-left of sprite
   static constexpr float USERNAME_OFFSET_X      = 10.f;  // pushes text past the avatar
   static constexpr float USERNAME_OFFSET_Y  = -50.f;
-  static constexpr float CHIPS_OFFSET_Y     = 72.f;
+  static constexpr float CHIPS_OFFSET_Y     = 94.f;
   static constexpr float CHIPS_OFFSET_X     = 190.f;
   // -------------------------------------------------------
 

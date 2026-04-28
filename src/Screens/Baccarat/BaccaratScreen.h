@@ -1,16 +1,15 @@
 //playerTabs[seatIndex].player = &realPlayer;
 //(when a real player joins at a seat you do this)
 #pragma once
-#include "Screen.h"
+#include "../Screen.h"
 #include <SFML/Graphics.hpp>
 #include <imgui.h>
 #include <vector>
-#include <memory>
-#include "../core/player.h"
-#include "../UI/UIHelper.h"
-#include "../UI/PlayerHUD.h"
-#include "../UI/CardSprite.h"
-#include "../logic/card.h"
+#include "../../core/player.h"
+#include "../../UI/UIHelper.h"
+#include "../../UI/PlayerHUD.h"
+#include "../../UI/CardSprite.h"
+#include "../../logic/card.h"
 
 // to keep the tab elements bundled together
 struct PlayerTab
@@ -34,12 +33,8 @@ private:
 
   Player m_emptyPlayer; // empty player
 
-  // Vectors to hold our separated Logic and Visuals
-  std::vector<std::unique_ptr<Card>> m_playerLogicCards;
-  std::vector<std::unique_ptr<CardSprite>> m_playerVisualCards;
-
-  std::vector<std::unique_ptr<Card>> m_bankerLogicCards;
-  std::vector<std::unique_ptr<CardSprite>> m_bankerVisualCards;
+  std::vector<CardSprite> m_playerCards;
+  std::vector<CardSprite> m_bankerCards;
 
   // Betting zone placeholders
   sf::RectangleShape playerBetZone;
@@ -55,7 +50,7 @@ public:
   {
     // Set up a 1080p green background
     tableBackground.setSize(sf::Vector2f({UI::SCREEN_W, UI::SCREEN_H}));
-    tableBackground.setFillColor(sf::Color(35, 107, 43)); // Casino green
+    tableBackground.setFillColor(sf::Color(35, 107, 0)); // Casino green
 
     // ---------------------------------------------------------
     // 1. CARD PLACEHOLDERS 
@@ -64,44 +59,17 @@ public:
     float playerStartX = UI::SCREEN_W * 0.35f - 150.0f;
     float bankerStartX = UI::SCREEN_W * 0.65f - 150.0f;
 
-    for (int i = 0; i < 3; ++i) 
+    for (int i = 0; i < 3; ++i)
     {
-      // --- Player Card Setup ---
-      auto pLogic = std::make_unique<Card>(1, 'S'); 
-      
-      // Build the string key (e.g., "1S") to ask the manager for the right texture
-      std::string pKey = std::to_string(pLogic->get_value()) + pLogic->get_suit();
-      
-      // Pass the specific front texture and the generic back texture from the AssetManager
-      auto pVisual = std::make_unique<CardSprite>(
-          *pLogic, 
-          sharedData.s_assets.getTexture(pKey), 
-          sharedData.s_assets.getTexture("cardBack")
-      );
+      // Player cards
+      m_playerCards.emplace_back(Card(5, 'S'), sharedData.s_assets);
+      m_playerCards.back().setOrigin(m_playerCards.back().getLocalSize() / 2.f);
+      UI::placeCardInHand(m_playerCards.back().getSFMLSprite(), playerStartX, 250.0f, i);
 
-      pVisual->setOrigin(pVisual->getLocalSize() / 2.f); 
-      UI::placeCardInHand(pVisual->getSFMLSprite(), playerStartX, 250.0f, i); 
-
-      m_playerLogicCards.push_back(std::move(pLogic));
-      m_playerVisualCards.push_back(std::move(pVisual));
-
-
-      // --- Banker Card Setup ---
-      auto bLogic = std::make_unique<Card>(13, 'H');
-      
-      std::string bKey = std::to_string(bLogic->get_value()) + bLogic->get_suit();
-      
-      auto bVisual = std::make_unique<CardSprite>(
-          *bLogic, 
-          sharedData.s_assets.getTexture(bKey), 
-          sharedData.s_assets.getTexture("cardBack")
-      );
-
-      bVisual->setOrigin(bVisual->getLocalSize() / 2.f);
-      UI::placeCardInHand(bVisual->getSFMLSprite(), bankerStartX, 250.0f, i);
-
-      m_bankerLogicCards.push_back(std::move(bLogic));
-      m_bankerVisualCards.push_back(std::move(bVisual));
+      // Banker cards
+      m_bankerCards.emplace_back(Card(2, 'S'), sharedData.s_assets);
+      m_bankerCards.back().setOrigin(m_bankerCards.back().getLocalSize() / 2.f);
+      UI::placeCardInHand(m_bankerCards.back().getSFMLSprite(), bankerStartX, 250.0f, i);
     }
 
     // ---------------------------------------------------------
@@ -116,7 +84,7 @@ public:
     tieBetZone.setOutlineColor(sf::Color::Yellow);
     tieBetZone.setOutlineThickness(5.0f);
     UI::centerOrigin(tieBetZone);
-    UI::placeCentered(tieBetZone, betZoneY); 
+    UI::placeCentered(tieBetZone, betZoneY);
 
     playerBetZone.setSize(betZoneSize);
     playerBetZone.setFillColor(sf::Color(20, 80, 25)); 
@@ -162,42 +130,28 @@ public:
 
     playerTabs[0].hud.setPlayer(&sharedData.s_testPlayer);
     playerTabs[0].isEmpty = false; 
+
   }
 
   std::string getHoveredElement(sf::Vector2f mousePos) override
   {
     if (playerBetZone.getGlobalBounds().contains(mousePos)) return "Player Bet Zone";
-    if (tieBetZone.getGlobalBounds().contains(mousePos)) return "Tie Bet Zone";
+    if (tieBetZone.getGlobalBounds().contains(mousePos))    return "Tie Bet Zone";
     if (bankerBetZone.getGlobalBounds().contains(mousePos)) return "Banker Bet Zone";
 
-    // Replaced the old broken `playerCards` references with `m_playerVisualCards`
-    for (size_t i = 0; i < m_playerVisualCards.size(); ++i)
-    {
-      if (m_playerVisualCards[i]->getGlobalBounds().contains(mousePos))
-      {
+    for (size_t i = 0; i < m_playerCards.size(); ++i)
+      if (m_playerCards[i].getGlobalBounds().contains(mousePos))
         return "Player Card " + std::to_string(i + 1);
-      }
-    }
 
-    // Replaced the old broken `bankerCards` references with `m_bankerVisualCards`
-    for (size_t i = 0; i < m_bankerVisualCards.size(); ++i)
-    {
-      if (m_bankerVisualCards[i]->getGlobalBounds().contains(mousePos))
-      {
+    for (size_t i = 0; i < m_bankerCards.size(); ++i)
+      if (m_bankerCards[i].getGlobalBounds().contains(mousePos))
         return "Banker Card " + std::to_string(i + 1);
-      }
-    }
-    
+
     for (size_t i = 0; i < playerTabs.size(); ++i)
-    {
       if (playerTabs[i].bounds.contains(mousePos))
-      {
         return "Player HUD Seat " + std::to_string(i + 1);
-      }
-    }
 
     if (tableBackground.getGlobalBounds().contains(mousePos)) return "Table Background";
-
     return "None";
   }
 
@@ -209,16 +163,24 @@ public:
       {
         m_nextState = ScreenState::MainMenu;
       }
+      if (keyPressed->scancode == sf::Keyboard::Scancode::Enter)
+      {
+        for (auto& card : m_playerCards)
+          card.flip();
+
+        for (auto& card : m_bankerCards)
+          card.flip();
+      }
     }
   }
 
-  void update(sf::RenderWindow& window) override
+  void update(sf::RenderWindow& window, sf::Time dt) override
   {
     for (auto& tab : playerTabs) 
     {
       tab.hud.update();  
     }
-    
+
     ImVec2 rawMouse = ImGui::GetIO().MousePos;
     sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
@@ -233,21 +195,14 @@ public:
     window.draw(tieBetZone);
     window.draw(bankerBetZone);
 
-    // Call draw() directly on the CardSprite visual classes
-    for (const auto& card : m_playerVisualCards)
-    {
-      card->draw(window);
-    }
+    for (const auto& card : m_playerCards)
+    card.draw(window);
 
-    for (const auto& card : m_bankerVisualCards)
-    {
-      card->draw(window);
-    }
+    for (const auto& card : m_bankerCards)
+    card.draw(window);
 
     for (const auto& tab : playerTabs)
-    {
-      tab.hud.draw(window); 
-    }
+    tab.hud.draw(window);
   }
 
   ScreenState getNextState() const override

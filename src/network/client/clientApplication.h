@@ -11,7 +11,7 @@
 #include "../../Screens/Screen.h"
 #include "../../Screens/StartScreen.h"
 #include "../../Screens/MainMenuScreen.h"
-#include "../../Screens/BaccaratScreen.h"
+#include "../../Screens/Baccarat/BaccaratScreen.h"
 #include "../../Screens/SettingsScreen.h"
 #include "../../Screens/demoScreen.h"
 #include "../../Screens/availableTablesScreens.h"
@@ -135,6 +135,22 @@ private:
     m_sharedData.s_assets.loadTexture("UIDemo", "assets/images/UIPack/UI assets Demo (2x).png");
     m_sharedData.s_assets.loadTexture("BlackAndWhiteUI", "assets/images/UI/BlackandWhiteUI.png");
 
+    m_sharedData.s_assets.loadTexture("cityBackground_sky", "assets/images/background/city 8/1.png");
+    m_sharedData.s_assets.loadTexture("cityBackground_far", "assets/images/background/city 8/2.png");
+    m_sharedData.s_assets.loadTexture("cityBackground_mid", "assets/images/background/city 8/3.png");
+    m_sharedData.s_assets.loadTexture("cityBackground_close", "assets/images/background/city 8/4.png");
+    m_sharedData.s_assets.loadTexture("cityBackground_front", "assets/images/background/city 8/5.png");
+
+    //star background
+    m_sharedData.s_assets.loadTexture("starsBackground", "assets/images/background/spacebackgrounds/spacebackgroundstars.png");
+    m_sharedData.s_assets.loadTexture("planetsBackground", "assets/images/background/spacebackgrounds/spacebackgroundplanets.png");
+    m_sharedData.s_assets.loadTexture("cloudsBackground", "assets/images/background/spacebackgrounds/spacebackgroundclouds.png");
+
+
+    //card texture loading
+    m_sharedData.s_assets.loadAllCardTextures("assets/images/Cards2/");
+
+
 
     // 2. Load SFML Global Font
     // We load this into m_sharedData so all screens can use it instantly
@@ -180,7 +196,6 @@ private:
     {
       std::cerr << "Failed to create cursor!\n";
     }
-    m_sharedData.s_assets.loadAllCardTextures("assets/images/Cards2/");
   }
 
   //main loop phases
@@ -261,17 +276,18 @@ private:
 
   void update()
   {
+    sf::Time dt = m_deltaClock.restart();
+
     //update imgui before your screens update
-    ImGui::SFML::Update(m_window, m_deltaClock.restart());
+    ImGui::SFML::Update(m_window, dt);
 
     // process the mail carrier
     processNetwork();
-
     applySettingsChanges(); // this is where the changes (if any) will be applied to the game
     handleScreenTransitions(); // changes screens if needed
 
     //update and draw the active screen
-    m_currentScreen->update(m_window);
+    m_currentScreen->update(m_window, dt);
 
     drawGlobalDebugUI(); // runs after the screen updates so it draws on top of everything!
   }

@@ -1,94 +1,76 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "../logic/card.h"
+#include "../core/AssetManager.h"
 
 class CardSprite
 {
 private:
-  // Pointer to your logic class
-  Card* m_card; 
-
-  // The SFML 3 visual representation
-  sf::Sprite m_sprite;
-
-  // Pointers to the pre-loaded textures
+  Card               m_card;
+  AssetManager*      m_assets;
   const sf::Texture* m_frontTexture;
   const sf::Texture* m_backTexture;
+  sf::Sprite         m_sprite;
 
 public:
-  // Constructor takes the logic card, plus the textures for its front and back
-  CardSprite(Card& card, const sf::Texture& frontTex, const sf::Texture& backTex)
-    : m_card(&card), 
-    m_sprite(card.is_flipped() ? backTex : frontTex),
-    m_frontTexture(&frontTex), 
-    m_backTexture(&backTex)
-  {
-    // Initialize the sprite to show the correct side immediately
-    update(); 
-  }
+  CardSprite(Card card, AssetManager& assets)
+    : m_card(card),
+    m_assets(&assets),
+    m_frontTexture(&assets.getTexture(m_card.getTextureKey())),
+    m_backTexture(&assets.getTexture("cardBack")),
+    m_sprite(m_card.is_flipped() ? *m_backTexture : *m_frontTexture)
+  {}
 
-  // Call this in your game loop so the visual matches the logic state
   void update()
   {
-    if (!m_card) return;
-
-    // Assuming is_flipped() == true means showing the back of the card.
-    // The 'true' parameter in setTexture resizes the sprite to fit the new texture's dimensions.
-    if (m_card->is_flipped())
-    {
-      m_sprite.setTexture(*m_backTexture, true); 
-    }
+    if (m_card.is_flipped())
+      m_sprite.setTexture(*m_backTexture);
     else
+      m_sprite.setTexture(*m_frontTexture);
+  }
+
+  void setCard(Card newCard)
   {
-      m_sprite.setTexture(*m_frontTexture, true);
-    }
+    m_card = newCard;
+    m_frontTexture = &m_assets->getTexture(m_card.getTextureKey());
+    update();
   }
 
-  // --- SFML 3 Rendering & Transforms ---
-  // SFML 3 prefers sf::RenderTarget over RenderWindow for broader compatibility
-  void draw(sf::RenderTarget& target) const
+  // 0 value means empty slot
+  void clearCard()
   {
-    target.draw(m_sprite);
+    m_card = Card(0, 'n');
+    m_sprite.setTexture(*m_backTexture);
   }
 
-  // SFML 3 heavily relies on sf::Vector2f for all coordinate math
-  void setPosition(sf::Vector2f pos) 
-  { 
-    m_sprite.setPosition(pos); 
-  }
+  //bool hasCard() const { return m_card.get_value() != 0; }
 
-  void setScale(sf::Vector2f scale) 
-  { 
-    m_sprite.setScale(scale); 
-  }
-
-  void setOrigin(sf::Vector2f origin) 
-  { 
-    m_sprite.setOrigin(origin); 
-  }
-
-  sf::Vector2f getPosition() const 
+  void flip()
   {
-    return m_sprite.getPosition();
+    m_card.set_flipped(!m_card.is_flipped());
+    update();
   }
 
-  // Useful for UIHelper functions (like centerOrigin)
-  sf::Vector2f getLocalSize() const 
+  // --- Rendering ---
+  void draw(sf::RenderTarget& target) const { target.draw(m_sprite); }
+
+  // --- Transforms ---
+  void setPosition(sf::Vector2f pos)  { m_sprite.setPosition(pos); }
+  void setScale(sf::Vector2f scale)   { m_sprite.setScale(scale); }
+  void setOrigin(sf::Vector2f origin) { m_sprite.setOrigin(origin); }
+  sf::Vector2f getPosition() const    { return m_sprite.getPosition(); }
+
+  // --- Bounds ---
+  sf::Vector2f getLocalSize() const
   {
     sf::FloatRect bounds = m_sprite.getLocalBounds();
-    return sf::Vector2f(bounds.size.x, bounds.size.y); // SFML 3 uses .size for FloatRects
+    return sf::Vector2f(bounds.size.x, bounds.size.y);
   }
+  sf::FloatRect getGlobalBounds() const { return m_sprite.getGlobalBounds(); }
 
-  // Useful for your getHoveredElement bounds checking
-  sf::FloatRect getGlobalBounds() const 
-  { 
-    return m_sprite.getGlobalBounds(); 
-  }
-
-  // Expose the raw sprite for UIHelper functions
-  sf::Sprite& getSFMLSprite() { return m_sprite; }
-  const sf::Sprite& getSFMLSprite() const { return m_sprite; }
-
-  // Retrieve the underlying logical card if needed
-  Card* getLogicalCard() const { return m_card; }
+  // --- Accessors ---
+  sf::Sprite&       getSFMLSprite()         { return m_sprite; }
+  const sf::Sprite& getSFMLSprite()   const { return m_sprite; }
+  Card&             getCard()               { return m_card; }
+  const Card&       getCard()         const { return m_card; }
 };
