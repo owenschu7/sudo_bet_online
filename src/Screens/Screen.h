@@ -15,6 +15,7 @@ enum class ScreenState
   Settings,
   Tables,
   Baccarat,
+  BaccaratTEST1,
   Blackjack,
   Poker,
   Quit,

@@ -1,4 +1,3 @@
-//playerTabs[seatIndex].player = &realPlayer;
 //(when a real player joins at a seat you do this)
 #pragma once
 #include "../Screen.h"
@@ -11,9 +10,11 @@
 #include "../../UI/CardSprite.h"
 #include "../../logic/card.h"
 #include "../../UI/PlayerTab.h"
+#include "../../UI/ChipSprite.h"
+#include "../../UI/TableChipRack.h"
 
 
-class BaccaratScreen : public Screen
+class BaccaratScreenTEST1 : public Screen
 {
 private:
   // Background
@@ -29,12 +30,25 @@ private:
   sf::RectangleShape tieBetZone;
   sf::RectangleShape bankerBetZone;
 
-  // Vector to hold our PlayerTabs
-  std::vector<PlayerTab> playerTabs;
+  PlayerTab m_playerTab;
   std::vector<Player> activePlayers;
 
+  
+  TableChipRack m_tableChipRack;
+
 public:
-  BaccaratScreen(SharedData &sharedData) : Screen(sharedData)
+  //PlayerHUD has no default constructor because sf::Text and sf::Sprite both require arguments
+  //so we initialize m_playerTab in the initializer list
+  BaccaratScreenTEST1(SharedData &sharedData) :
+    Screen(sharedData),
+    m_playerTab(
+      sharedData.s_assets.getFont("gameFont"),
+      sharedData.s_assets.getFont("gameNumbersFont"),
+      sharedData.s_assets.getTexture("HUD_Coin"),
+      m_emptyPlayer,
+      sf::Vector2f{10.f, 10.f}
+    ),
+    m_tableChipRack(sharedData.s_testPlayer, sharedData.s_assets)
   {
     // Set up a 1080p green background
     tableBackground.setSize(sf::Vector2f({UI::SCREEN_W, UI::SCREEN_H}));
@@ -64,7 +78,7 @@ public:
     // 2. BETTING ZONES
     // ---------------------------------------------------------
     sf::Vector2f betZoneSize(300.0f, 150.0f);
-    float betZoneY = 700.0f;
+    float betZoneY = 500.0f;
     float betZoneOffset = 350.0f; 
 
     tieBetZone.setSize(betZoneSize);
@@ -88,36 +102,12 @@ public:
     UI::centerOrigin(bankerBetZone);
     UI::placeCenteredoffsetRight(bankerBetZone, betZoneY, betZoneOffset); 
 
-    // ---------------------------------------------------------
-    // 3. INITIALIZE EMPTY PLAYER TABS
-    // ---------------------------------------------------------
-    int numTabs = 4;
-    sf::Vector2f tabSize(240.0f, 60.0f);
-    float startY = 880.0f;
+    // 3. INITIALIZE the PLAYER TAB
+    m_playerTab.hud.setPlayer(&sharedData.s_testPlayer);
 
-    float totalTabWidth = numTabs * tabSize.x;
-    float tabSpacing = 220.f;
-    float startX = 20.f; 
+    //chips
 
-    playerTabs.reserve(numTabs); 
     
-    // Fetch Font and HUD Background Texture once for the loop
-    const sf::Font& font = sharedData.s_assets.getFont("gameFont");
-    const sf::Font& coinsFont = sharedData.s_assets.getFont("gameNumbersFont");
-    const sf::Texture& hudTex = sharedData.s_assets.getTexture("HUD_Coin");
-
-    for (int i = 0; i < numTabs; ++i)
-    {
-      float tabX = startX + (i * (tabSize.x + tabSpacing));
-      float hudX = tabX + (tabSize.x / 2.f) - (PlayerHUD::WIDTH / 2.f); 
-      float hudY = startY;
-
-      // this is where we create the PlayerHUD objects at
-      playerTabs.emplace_back(font, coinsFont, hudTex, m_emptyPlayer, sf::Vector2f{hudX, hudY});
-    }
-
-    playerTabs[0].hud.setPlayer(&sharedData.s_testPlayer);
-    playerTabs[0].isEmpty = false; 
 
   }
 
@@ -135,9 +125,8 @@ public:
       if (m_bankerCards[i].getGlobalBounds().contains(mousePos))
         return "Banker Card " + std::to_string(i + 1);
 
-    for (size_t i = 0; i < playerTabs.size(); ++i)
-      if (playerTabs[i].bounds.contains(mousePos))
-        return "Player HUD Seat " + std::to_string(i + 1);
+    if (m_playerTab.bounds.contains(mousePos))
+      return "Player HUD";
 
     if (tableBackground.getGlobalBounds().contains(mousePos)) return "Table Background";
     return "None";
@@ -164,14 +153,47 @@ public:
 
   void update(sf::RenderWindow& window, sf::Time dt) override
   {
-    for (auto& tab : playerTabs) 
-    {
-      tab.hud.update();  
-    }
+    //calu mouse cords
+    sf::Vector2i mousePosWindow = sf::Mouse::getPosition(window);
+    sf::Vector2f mouseCoords = window.mapPixelToCoords(mousePosWindow);
+
+    m_playerTab.hud.update();
+    m_tableChipRack.update(mouseCoords);
 
     ImVec2 rawMouse = ImGui::GetIO().MousePos;
     sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
+
+    // -------------------------------------------------------
+    // ImGui Chip Control Window
+    // -------------------------------------------------------
+    ImGui::Begin("Chip Controls"); 
+
+    ImGui::Text("Enter desired chip amount:");
+    
+    static int inputAmount = 0; 
+
+    // 1. Removed the crash-causing flag!
+    ImGui::InputInt("##ChipAmount", &inputAmount, 1, 100);
+
+    // 2. This is the correct ImGui way to check if the user pressed Enter
+    // or clicked away after changing the number.
+    bool userFinishedTyping = ImGui::IsItemDeactivatedAfterEdit();
+
+    // Prevent negative chip values
+    if (inputAmount < 0) {
+        inputAmount = 0;
+    }
+
+    // 3. Update if the button is clicked OR they finished typing
+    if (ImGui::Button("Update Rack") || userFinishedTyping)
+    {
+        m_tableChipRack.setValue(inputAmount);
+        //std::cout << "Rack updated to: " << inputAmount << std::endl;
+    }
+
+    ImGui::End();
+    // -------------------------------------------------------
 
     // Baccarat game logic (dealing cards, checking win conditions) goes here
   }
@@ -189,8 +211,8 @@ public:
     for (const auto& card : m_bankerCards)
     card.draw(window);
 
-    for (const auto& tab : playerTabs)
-    tab.hud.draw(window);
+    m_playerTab.hud.draw(window);
+    m_tableChipRack.draw(window);
   }
 
   ScreenState getNextState() const override

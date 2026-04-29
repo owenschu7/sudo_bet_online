@@ -104,7 +104,7 @@ struct Label
         }
     }
 
-    void draw(sf::RenderWindow& window)
+    void draw(sf::RenderTarget& window)
     {
         if (m_hasBanner && bannerSprite)
         {

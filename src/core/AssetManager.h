@@ -117,4 +117,10 @@ public:
     // You might need to change "card_back_blue.png" to match the new file.
     loadTexture("cardBack", folderPath + "cardBack_blue1.png");
   }
+
+  void loadAllChipTextures(const std::string& folderPath)
+  {
+    loadTexture("chips", folderPath + "Chips.png"); // one spritesheet
+  }
+
 };

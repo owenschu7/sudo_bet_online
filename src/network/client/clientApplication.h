@@ -12,6 +12,7 @@
 #include "../../Screens/StartScreen.h"
 #include "../../Screens/MainMenuScreen.h"
 #include "../../Screens/Baccarat/BaccaratScreen.h"
+#include "../../Screens/Baccarat/BaccaratScreenTEST1.h"
 #include "../../Screens/SettingsScreen.h"
 #include "../../Screens/demoScreen.h"
 #include "../../Screens/availableTablesScreens.h"
@@ -149,6 +150,9 @@ private:
 
     //card texture loading
     m_sharedData.s_assets.loadAllCardTextures("assets/images/Cards2/");
+
+    //chips texture loading
+    m_sharedData.s_assets.loadAllChipTextures("assets/images/poker/");
 
 
 
@@ -391,6 +395,8 @@ private:
           m_currentScreen = std::make_unique<AvailableTablesScreen>(m_sharedData); break;
         case ScreenState::Baccarat:
           m_currentScreen = std::make_unique<BaccaratScreen>(m_sharedData); break;
+        case ScreenState::BaccaratTEST1:
+          m_currentScreen = std::make_unique<BaccaratScreenTEST1>(m_sharedData); break;
         case ScreenState::Demo:
           m_currentScreen = std::make_unique<DemoScreen>(m_sharedData); break;
         case ScreenState::Quit:
@@ -497,9 +503,16 @@ private:
       // Passing &showMouseTracker adds an "X" close button to the corner
       ImGui::Begin("Mouse Position Tracker", &showMouseTracker, ImGuiWindowFlags_AlwaysAutoResize);
       
-      ImVec2 mousePos = ImGui::GetIO().MousePos;
-      ImGui::Text("X: %.1f", mousePos.x);
-      ImGui::Text("Y: %.1f", mousePos.y);
+      ImVec2 rawMousePos = ImGui::GetIO().MousePos;
+
+      // convert to SFML pixel format
+      sf::Vector2i pixelPos(static_cast<int>(rawMousePos.x), static_cast<int>(rawMousePos.y));
+
+      // Map to SFML view coordinates (this handles your 1920x1080 scaling!)
+      sf::Vector2f relativePos = m_window.mapPixelToCoords(pixelPos);
+
+      ImGui::Text("X: %.1f", relativePos.x);
+      ImGui::Text("Y: %.1f", relativePos.y);
       
       ImGui::End();
     }
