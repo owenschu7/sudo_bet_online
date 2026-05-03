@@ -5,6 +5,7 @@
 #include "../UI/menuButton.h"
 #include "../UI/textLabel.h"
 #include "../UI/UIHelper.h"
+#include "../UI/background/Background.h"
 
 #include "../core/GameEvents.h"
 
@@ -17,12 +18,15 @@ private:
 
   sf::RectangleShape menuBackground;
 
+  Background m_treeAndHouseBackground;
+
   // --- UI HELPER METHODS ---
 
 
 public:
   MapScreen(SharedData &sharedData)
-    : Screen(sharedData)
+    : Screen(sharedData),
+    m_treeAndHouseBackground(sharedData.s_assets.getTexture("treeandhouse"), 1.0f)
   {
     //set up a dark blue background for the menu
     menuBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
@@ -94,6 +98,7 @@ public:
   {
     // draw play button, settings button, background
     window.draw(menuBackground);
+    m_treeAndHouseBackground.draw(window);
 
     if (!m_shared.s_needUsername)
     {

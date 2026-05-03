@@ -133,8 +133,10 @@ private:
 
 
     // Inside clientApplication::loadAssets()
+    // UI
     m_sharedData.s_assets.loadTexture("UIDemo", "assets/images/UIPack/UI assets Demo (2x).png");
     m_sharedData.s_assets.loadTexture("BlackAndWhiteUI", "assets/images/UI/BlackandWhiteUI.png");
+    m_sharedData.s_assets.loadTexture("SelectUI", "assets/images/UI/Complete_UI_Book_Styles_Pack_Free_v1.0/01_TravelBookLite/Sprites/UI_TravelBook_Select01a.png");
 
     m_sharedData.s_assets.loadTexture("cityBackground_sky", "assets/images/background/city 8/1.png");
     m_sharedData.s_assets.loadTexture("cityBackground_far", "assets/images/background/city 8/2.png");
@@ -147,6 +149,8 @@ private:
     m_sharedData.s_assets.loadTexture("planetsBackground", "assets/images/background/spacebackgrounds/spacebackgroundplanets.png");
     m_sharedData.s_assets.loadTexture("cloudsBackground", "assets/images/background/spacebackgrounds/spacebackgroundclouds.png");
 
+    //map backgrounds
+    m_sharedData.s_assets.loadTexture("treeandhouse", "assets/images/background/map_backgrounds/treeandhouse.png");
 
     //card texture loading
     m_sharedData.s_assets.loadAllCardTextures("assets/images/Cards2/");

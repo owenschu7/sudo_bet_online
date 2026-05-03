@@ -66,15 +66,20 @@ private:
 
   static ChipStackSize stackFromAmount(int amount)
   {
-    if      (amount >= 9) return ChipStackSize::Lots;
+    if      (amount >= 6) return ChipStackSize::Lots;
     else if (amount >= 3) return ChipStackSize::Triple;
     else if (amount == 2) return ChipStackSize::Double; 
     else                  return ChipStackSize::Single;
   }
+
   void updateVisuals()
   {
     m_stack = stackFromAmount(m_count);
     m_sprite.setTextureRect(getTextureRect(m_color, m_stack));
+
+    // Automatically re-center the origin whenever the sprite size changes
+    sf::FloatRect bounds = m_sprite.getLocalBounds();
+    m_sprite.setOrigin({bounds.size.x / 2.0f, bounds.size.y / 2.0f});
   }
 
 public:
@@ -93,6 +98,7 @@ public:
   // Getters
   sf::Vector2f  getPosition()  const { return m_sprite.getPosition(); }
   sf::FloatRect getGlobalBounds() const { return m_sprite.getGlobalBounds(); }
+  sf::FloatRect getLocalBounds() const { return m_sprite.getLocalBounds(); }
   sf::Vector2f  getLocalSize() const
   {
     auto b = m_sprite.getLocalBounds(); 

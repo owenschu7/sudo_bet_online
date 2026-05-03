@@ -7,11 +7,16 @@
 #include "../../core/player.h"
 #include "../../UI/UIHelper.h"
 #include "../../UI/PlayerHUD.h"
-#include "../../UI/CardSprite.h"
-#include "../../logic/card.h"
 #include "../../UI/PlayerTab.h"
-#include "../../UI/ChipSprite.h"
 #include "../../UI/TableChipRack.h"
+#include "../../UI/LeftMenu.h"
+#include "../../UI/BaccaratArea.h"
+#include "../../UI/CursorUI.h"
+
+//for local testing
+//this will be removed when server is done (server should handle baccarat logic not client)
+#include "../../logic/baccarat/baccarat_table.h"
+
 
 
 class BaccaratScreenTEST1 : public Screen
@@ -20,21 +25,23 @@ private:
   // Background
   sf::RectangleShape tableBackground;
 
+  // Baccarat Area and Chip Rack
+  BaccaratArea m_baccaratArea;
+  TableChipRack m_tableChipRack;
+  CursorUI m_cursorText;
+
+  // PLAYERS
   Player m_emptyPlayer; // empty player
-
-  std::vector<CardSprite> m_playerCards;
-  std::vector<CardSprite> m_bankerCards;
-
-  // Betting zone placeholders
-  sf::RectangleShape playerBetZone;
-  sf::RectangleShape tieBetZone;
-  sf::RectangleShape bankerBetZone;
-
   PlayerTab m_playerTab;
   std::vector<Player> activePlayers;
 
+  // MENU
+  LeftMenu m_leftMenu; // displays the button and the window if button is clicked
+  WindowStates m_currentWindowState; // holds the state of the screen (if menu is open or not)
   
-  TableChipRack m_tableChipRack;
+  //baccarat logic
+  Baccarat_table m_bacc;
+  std::vector<Round_Record> m_rounds; // a list of all the rounds played
 
 public:
   //PlayerHUD has no default constructor because sf::Text and sf::Sprite both require arguments
@@ -48,92 +55,47 @@ public:
       m_emptyPlayer,
       sf::Vector2f{10.f, 10.f}
     ),
-    m_tableChipRack(sharedData.s_testPlayer, sharedData.s_assets)
+    m_tableChipRack(sharedData.s_testPlayer, sharedData.s_assets),
+    m_leftMenu(sharedData.s_testPlayer, sharedData.s_assets),
+    m_baccaratArea(sharedData.s_assets, 350.f, 75.0f, 1200.0f, 545.0f),
+    m_bacc(1, 6),
+    m_cursorText(sharedData.s_assets)
   {
     // Set up a 1080p green background
     tableBackground.setSize(sf::Vector2f({UI::SCREEN_W, UI::SCREEN_H}));
     tableBackground.setFillColor(sf::Color(35, 107, 0)); // Casino green
 
-    // ---------------------------------------------------------
-    // 1. CARD PLACEHOLDERS 
-    // ---------------------------------------------------------
-    // Calculate starting X
-    float playerStartX = UI::SCREEN_W * 0.35f - 150.0f;
-    float bankerStartX = UI::SCREEN_W * 0.65f - 150.0f;
-
-    for (int i = 0; i < 3; ++i)
-    {
-      // Player cards
-      m_playerCards.emplace_back(Card(5, 'S'), sharedData.s_assets);
-      m_playerCards.back().setOrigin(m_playerCards.back().getLocalSize() / 2.f);
-      UI::placeCardInHand(m_playerCards.back().getSFMLSprite(), playerStartX, 250.0f, i);
-
-      // Banker cards
-      m_bankerCards.emplace_back(Card(2, 'S'), sharedData.s_assets);
-      m_bankerCards.back().setOrigin(m_bankerCards.back().getLocalSize() / 2.f);
-      UI::placeCardInHand(m_bankerCards.back().getSFMLSprite(), bankerStartX, 250.0f, i);
-    }
-
-    // ---------------------------------------------------------
-    // 2. BETTING ZONES
-    // ---------------------------------------------------------
-    sf::Vector2f betZoneSize(300.0f, 150.0f);
-    float betZoneY = 500.0f;
-    float betZoneOffset = 350.0f; 
-
-    tieBetZone.setSize(betZoneSize);
-    tieBetZone.setFillColor(sf::Color(20, 80, 25));
-    tieBetZone.setOutlineColor(sf::Color::Yellow);
-    tieBetZone.setOutlineThickness(5.0f);
-    UI::centerOrigin(tieBetZone);
-    UI::placeCentered(tieBetZone, betZoneY);
-
-    playerBetZone.setSize(betZoneSize);
-    playerBetZone.setFillColor(sf::Color(20, 80, 25)); 
-    playerBetZone.setOutlineColor(sf::Color::Blue);
-    playerBetZone.setOutlineThickness(5.0f);
-    UI::centerOrigin(playerBetZone);
-    UI::placeCenteredoffsetLeft(playerBetZone, betZoneY, betZoneOffset); 
-
-    bankerBetZone.setSize(betZoneSize);
-    bankerBetZone.setFillColor(sf::Color(20, 80, 25));
-    bankerBetZone.setOutlineColor(sf::Color::Red);
-    bankerBetZone.setOutlineThickness(5.0f);
-    UI::centerOrigin(bankerBetZone);
-    UI::placeCenteredoffsetRight(bankerBetZone, betZoneY, betZoneOffset); 
-
-    // 3. INITIALIZE the PLAYER TAB
+    // init the playerHUD
     m_playerTab.hud.setPlayer(&sharedData.s_testPlayer);
-
-    //chips
-
-    
 
   }
 
   std::string getHoveredElement(sf::Vector2f mousePos) override
   {
-    if (playerBetZone.getGlobalBounds().contains(mousePos)) return "Player Bet Zone";
-    if (tieBetZone.getGlobalBounds().contains(mousePos))    return "Tie Bet Zone";
-    if (bankerBetZone.getGlobalBounds().contains(mousePos)) return "Banker Bet Zone";
+    if (m_baccaratArea.getFeltBounds().contains(mousePos)) 
+    {
+      // If they are on the felt, you can get even more specific!
+      // You could add similar "getBounds" for your labels if you want:
+      // if (m_baccaratArea->isOverBanker(mousePos)) return "Banker Zone";
 
-    for (size_t i = 0; i < m_playerCards.size(); ++i)
-      if (m_playerCards[i].getGlobalBounds().contains(mousePos))
-        return "Player Card " + std::to_string(i + 1);
+      return "Baccarat Table";
+    }
 
-    for (size_t i = 0; i < m_bankerCards.size(); ++i)
-      if (m_bankerCards[i].getGlobalBounds().contains(mousePos))
-        return "Banker Card " + std::to_string(i + 1);
-
-    if (m_playerTab.bounds.contains(mousePos))
+    // 2. Check other Screen-level UI
+    if (m_playerTab.bounds.contains(mousePos)) 
       return "Player HUD";
 
-    if (tableBackground.getGlobalBounds().contains(mousePos)) return "Table Background";
+    if (tableBackground.getGlobalBounds().contains(mousePos)) 
+      return "Floor";
+
     return "None";
   }
 
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override
   {
+    m_tableChipRack.handleEvent(event, window);
+    m_leftMenu.handleEvent(event, window);
+
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
       if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
@@ -142,11 +104,11 @@ public:
       }
       if (keyPressed->scancode == sf::Keyboard::Scancode::Enter)
       {
-        for (auto& card : m_playerCards)
-          card.flip();
-
-        for (auto& card : m_bankerCards)
-          card.flip();
+        m_baccaratArea.flipAllCards();
+      }
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Space))
+      {
+        m_baccaratArea.clearHands();
       }
     }
   }
@@ -159,11 +121,102 @@ public:
 
     m_playerTab.hud.update();
     m_tableChipRack.update(mouseCoords);
+    m_leftMenu.update(mouseCoords);
+
+    int currentSelection = m_tableChipRack.getSelectedChipValue();
+    m_cursorText.updateMultiplier(currentSelection);
+
+    m_cursorText.updatePosition(window);
+
+    WindowStates newState = m_leftMenu.isOpen() ? WindowStates::MenuOpen : WindowStates::MenuClosed;
+    if (newState != m_currentWindowState)
+    {
+      m_currentWindowState = newState;
+      m_baccaratArea.setWindowState(m_currentWindowState);
+      m_tableChipRack.setWindowState(m_currentWindowState);
+    }
 
     ImVec2 rawMouse = ImGui::GetIO().MousePos;
     sf::Vector2i pixelPos(static_cast<int>(rawMouse.x), static_cast<int>(rawMouse.y));
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
+    //window to control the amount of chips shown
+    chipControlWindow();
+    RenderBaccaratTesterUI();
+
+    // Baccarat game logic (dealing cards, checking win conditions) goes here
+  }
+
+  void draw(sf::RenderWindow& window) override
+  {
+    window.draw(tableBackground);
+
+    m_baccaratArea.draw(window);
+    m_tableChipRack.draw(window);
+
+    m_playerTab.hud.draw(window);
+    m_leftMenu.draw(window);
+
+    m_cursorText.draw(window);
+  }
+
+  ScreenState getNextState() const override
+  {
+    return m_nextState;
+  }
+
+
+  //imgui functions
+  void RenderBaccaratTesterUI() {
+    ImGui::Begin("Baccarat Hand Tester", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+    // Create a 2-column layout for Player and Banker areas
+    ImGui::Columns(2, "BaccaratTable", false);
+
+    ImGui::NextColumn();
+
+    ImGui::Columns(1); // Reset back to single column layout
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // --- ACTION BUTTONS ---
+    // Centered/grouped action buttons at the bottom
+    if (ImGui::Button("Play Hand", ImVec2(200, 60)))
+    {
+      m_baccaratArea.clearHands(); // remove last hands cards
+
+      Round_Record curr_round = m_bacc.play_round();
+      m_rounds.push_back(curr_round);
+
+      m_baccaratArea.addPlayerCard(curr_round.player_cards.get_first_card());
+      m_baccaratArea.addPlayerCard(curr_round.player_cards.get_second_card());
+      m_baccaratArea.addPlayerCard(curr_round.player_cards.get_third_card());
+
+      m_baccaratArea.addBankerCard(curr_round.banker_cards.get_first_card());
+      m_baccaratArea.addBankerCard(curr_round.banker_cards.get_second_card());
+      m_baccaratArea.addBankerCard(curr_round.banker_cards.get_third_card());
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Clear Cards", ImVec2(200, 60)))
+    {
+      m_baccaratArea.clearHands();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Flip All", ImVec2(200, 60))) {
+      m_baccaratArea.flipAllCards();
+    }
+
+    ImGui::End();
+  }
+
+  void chipControlWindow()
+  {
     // -------------------------------------------------------
     // ImGui Chip Control Window
     // -------------------------------------------------------
@@ -194,29 +247,5 @@ public:
 
     ImGui::End();
     // -------------------------------------------------------
-
-    // Baccarat game logic (dealing cards, checking win conditions) goes here
-  }
-
-  void draw(sf::RenderWindow& window) override
-  {
-    window.draw(tableBackground);
-    window.draw(playerBetZone);
-    window.draw(tieBetZone);
-    window.draw(bankerBetZone);
-
-    for (const auto& card : m_playerCards)
-    card.draw(window);
-
-    for (const auto& card : m_bankerCards)
-    card.draw(window);
-
-    m_playerTab.hud.draw(window);
-    m_tableChipRack.draw(window);
-  }
-
-  ScreenState getNextState() const override
-  {
-    return m_nextState;
   }
 };
