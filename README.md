@@ -1,35 +1,20 @@
 
-<div align ="center">
 
-  
-```
-                                                                                     
-                               $$\                 $$\                  $$\          
-                               $$ |                $$ |                 $$ |        
-      $$$$$$$\ $$\   $$\  $$$$$$$ | $$$$$$\        $$$$$$$\   $$$$$$\ $$$$$$\        
-     $$  _____|$$ |  $$ |$$  __$$ |$$  __$$\       $$  __$$\ $$  __$$\\_$$  _|       
-     \$$$$$$\  $$ |  $$ |$$ /  $$ |$$ /  $$ |      $$ |  $$ |$$$$$$$$ | $$ |         
-      \____$$\ $$ |  $$ |$$ |  $$ |$$ |  $$ |      $$ |  $$ |$$   ____| $$ |$$\     
-     $$$$$$$  |\$$$$$$  |\$$$$$$$ |\$$$$$$  |      $$$$$$$  |\$$$$$$$\  \$$$$  |    
-     \_______/  \______/  \_______| \______/       \_______/  \_______|  \____/      
-                                                                       * online      
+***This is an archived project that I am no longer working on.***
 
-```
-
-</div>
 
 A multiplayer, client-server casino platform. The architecture allows a central server to manage multiple concurrent game tables, while clients can seamlessly connect, view available lobbies, and join active games in real-time.
 
 # Features
 - Real-Time Multiplayer: Built with raw sockets for fast, peer-to-peer style communication.
-- Server Architecture: Backend maintains game states, calculates payouts, and broadcasts updates to all connected clients.
+- Server Architecture: Back end maintains game states, calculates payouts, and broadcasts updates to all connected clients.
 - Dynamic Lobbies: Players can query the server to see a list of active tables, current player counts, and game statuses before joining.
 - Graphical Client: A smooth user interface utilizing SFML and ImGui for a quality desktop experience. 
 
 # Architecture Overview
 The project is split into two primary components
 - The Server: Written in C++, handling all socket connections, multiple tables, and the core game logic. It acts as the single source of truth to prevent client-side manipulation.
-- The Client: A powerful C++ application that establishes a TCP connection to the server, renders the game state using SFML/ImGui, and handles user input to send and recieve across the network.
+- The Client: A powerful C++ application that establishes a TCP connection to the server, renders the game state using SFML/ImGui, and handles user input to send and receive across the network.
 
 # Prerequisites
 
@@ -38,7 +23,6 @@ To build and run sudo bet online, you will need the following installed on your 
   - A modern C++ compiler (GCC or Clang)
   - CMake (v3.10+)
   - SFML
-  - Note: ImGui is included in the source code
 
 Clone the repository and compile both the client and server using CMake:
 Bash
@@ -60,7 +44,7 @@ Launch one or more instances of the client from another terminal window
 # Roadmap
 - finish game ui
 - finish table and session tracking on server
-- Add customizable screen layout with presents using imgui
+- Add customizable screen layout with presents
 
 # Contributing
 Feel free to contribute
