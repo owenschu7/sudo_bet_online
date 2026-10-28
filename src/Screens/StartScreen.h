@@ -1,10 +1,11 @@
+// this is the start screen with the city background parralax
 #pragma once
 #include "Screen.h"
 #include <SFML/Graphics.hpp>
 #include <imgui.h>
 #include "../core/Debug.h"
-#include "../UI/menuButton.h"
-#include "../UI/textLabel.h"
+#include "../UI/Button.h"
+#include "../UI/Label.h"
 #include "../UI/UIHelper.h"
 #include "../UI/background/ParallaxBackground.h"
 
@@ -61,8 +62,34 @@ private:
 public:
   StartScreen(SharedData& sharedData)
     : Screen(sharedData),
-    m_gameTitle(sharedData.s_assets.getFont("gameFontTitle")),
-    m_usernameDisplay(sharedData.s_assets.getFont("gameFont"))
+    m_gameTitle(
+      sharedData.s_assets.getFont("gameFontTitle"),
+      sharedData.s_assets.getTexture("BlackAndWhiteUI"),
+      BannerType::Banner3,
+      "Sudo Bet \nOnline", 220, sf::Color::White, 11.0f,
+      {UI::SCREEN_W / 2.0f, 320.0f}
+    ),
+    m_usernameDisplay(
+      sharedData.s_assets.getFont("gameFont"),
+      "Username: ", 30, sf::Color::White,
+      {30.0f, UI::SCREEN_H - 60.0f}, false
+    ),
+    // The Y-coordinate offsets by (17 * 8.0f / 2.0f) to account for the new center-origin
+    m_startButton(
+        sharedData.s_assets.getTexture("BlackAndWhiteUI"), 
+        ButtonType::MenuStart, 8.0f, 
+        {UI::SCREEN_W / 2.0f, 580.0f + 68.0f} 
+    ),
+    m_settingsButton(
+        sharedData.s_assets.getTexture("BlackAndWhiteUI"), 
+        ButtonType::MenuSettings, 8.0f, 
+        {UI::SCREEN_W / 2.0f, 580.0f + 155.0f + 68.0f}
+    ),
+    m_exitButton(
+        sharedData.s_assets.getTexture("BlackAndWhiteUI"), 
+        ButtonType::MenuExit, 8.0f, 
+        {UI::SCREEN_W / 2.0f, 580.0f + 310.0f + 68.0f}
+    )
   {
     // 1. Background
     m_menuBackground.setSize({UI::SCREEN_W, UI::SCREEN_H});
@@ -94,25 +121,6 @@ public:
     float centerX = (UI::SCREEN_W - scaledW) / 2.0f;
     float startY  = 580.0f;
     float spacing = 155.0f;
-
-    const sf::Texture& uiTexture = sharedData.s_assets.getTexture("BlackAndWhiteUI");
-
-    m_startButton.setupNoText(uiTexture, startButtonCrop, btnScale, {centerX, startY});
-    m_settingsButton.setupNoText(uiTexture, settingsButtonCrop, btnScale, {centerX, startY + spacing});
-    m_exitButton.setupNoText(uiTexture, exitButtonCrop, btnScale, {centerX, startY + (spacing * 2)});
-
-    // 4. Setup labels
-    m_gameTitle.setupWithBanner(
-      "Sudo Bet \nOnline", 
-      220, sf::Color::White,
-      {UI::SCREEN_W / 2.0f, 320.0f},
-      true,
-      uiTexture,
-      BannerType::Banner3,
-      11.0f,
-      {0.0f, 0.0f}
-    );
-    m_usernameDisplay.setup("Username: ", 30, sf::Color::White, {30.0f, UI::SCREEN_H - 60.0f}, false);
   }
 
   void handleEvent(const sf::Event& event, sf::RenderWindow& window) override

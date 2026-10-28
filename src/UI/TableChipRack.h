@@ -7,7 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
-#include "textLabel.h"
+#include "Label.h"
 #include "Area.h"
 
 
@@ -56,7 +56,8 @@ class TableChipRack : public Area
       m_redChip(5, 0, m_assetMan),
       m_yellowChip(25, 0, m_assetMan),
       m_blueChip(100, 0, m_assetMan),
-      m_totalLabel(assetMan.getFont("gameNumbersFont")),
+      // FIX: remove to_string()
+      m_totalLabel(assetMan.getFont("gameNumbersFont"), std::to_string(10000), 40, sf::Color::White, {1000.f, 900.0f}, true),
       m_selectionSprite(assetMan.getTexture("SelectUI"))
   {
     m_value = player.getChips();
@@ -90,7 +91,7 @@ class TableChipRack : public Area
     m_tableBoard.setPosition({500, 700});
     m_tableBoard.setScale({5.5f, 5.5f});
 
-    m_totalLabel.setup(std::to_string(10000), 40, sf::Color::White, {1000.f, 900.f}, true);
+    //remove: m_totalLabel.setup(std::to_string(10000), 40, sf::Color::White, {1000.f, 900.f}, true);
 
     //selection stuff
     m_selectionSprite.setTextureRect(sf::IntRect({0, 0}, {30, 30}));

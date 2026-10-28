@@ -1,9 +1,10 @@
+// changed to SkillsScreen.h
 #include "Screen.h"
 #include <SFML/Graphics.hpp>
 #include <imgui.h>
 #include "../core/Debug.h"
-#include "../UI/menuButton.h"
-#include "../UI/textLabel.h"
+#include "../UI/Button.h"
+#include "../UI/Label.h"
 #include "../UI/UIHelper.h"
 
 #include "../core/GameEvents.h"

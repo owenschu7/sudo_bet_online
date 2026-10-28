@@ -13,11 +13,12 @@
 #include "../../Screens/MainMenuScreen.h"
 #include "../../Screens/Baccarat/BaccaratScreen.h"
 #include "../../Screens/Baccarat/BaccaratScreenTEST1.h"
+#include "../../Screens/Blackjack/BlackjackScreen.h"
 #include "../../Screens/SettingsScreen.h"
 #include "../../Screens/demoScreen.h"
 #include "../../Screens/availableTablesScreens.h"
 #include "../../Screens/MapScreen.h"
-#include "../../Screens/ShopScreen.h"
+#include "../../Screens/SkillsScreen.h"
 
 #include "../../network/client/NetworkClient.h"
 #include "../../network/PacketParser.h"
@@ -38,7 +39,7 @@ public:
 
     //load the main menu
     //currentScreen will hold the current screen we are on (main menu, game screen, settings menu etc)
-    m_currentScreen = std::make_unique<StartScreen>(m_sharedData);
+    m_currentScreen = std::make_unique<MainMenuScreen>(m_sharedData);
   }
 
   ~clientApplication()
@@ -391,8 +392,8 @@ private:
           m_currentScreen = std::make_unique<MainMenuScreen>(m_sharedData); break;
         case ScreenState::Map:
           m_currentScreen = std::make_unique<MapScreen>(m_sharedData); break;
-        case ScreenState::Shop:
-          m_currentScreen = std::make_unique<ShopScreen>(m_sharedData); break;
+        case ScreenState::Skills:
+          m_currentScreen = std::make_unique<SkillsScreen>(m_sharedData); break;
         case ScreenState::Settings:
           m_currentScreen = std::make_unique<SettingsScreen>(m_sharedData); break;
         case ScreenState::Tables:
@@ -401,6 +402,8 @@ private:
           m_currentScreen = std::make_unique<BaccaratScreen>(m_sharedData); break;
         case ScreenState::BaccaratTEST1:
           m_currentScreen = std::make_unique<BaccaratScreenTEST1>(m_sharedData); break;
+        case ScreenState::Blackjack:
+          m_currentScreen = std::make_unique<BlackjackScreen>(m_sharedData); break;
         case ScreenState::Demo:
           m_currentScreen = std::make_unique<DemoScreen>(m_sharedData); break;
         case ScreenState::Quit:

@@ -7,9 +7,10 @@
 #include "../core/player.h"
 #include "../core/AssetManager.h"
 #include <SFML/Graphics.hpp>
-#include "textLabel.h"
+#include "Label.h"
 #include "UIHelper.h"
-#include "menuButton.h"
+#include "Button.h"
+#include <iostream>
 
 
 class LeftMenu
@@ -30,36 +31,34 @@ class LeftMenu
     // -------------------------------------------------------
     // Layout constants — if we need them (prob not)
     // -------------------------------------------------------
-    static constexpr float MENU_START_X = 65.f;
-    static constexpr float MENU_START_Y = 225.f;
+    static constexpr float MENU_START_X = 30.f;
+    static constexpr float MENU_START_Y = 30.f;
     // -------------------------------------------------------
     LeftMenu(const Player& player, AssetManager& assetMan)
       : m_player(&player),
       m_assetMan(assetMan),
-      m_leftMenuLabel(assetMan.getFont("gameFont")),
-      m_menuWindow(assetMan.getTexture("BlackAndWhiteUI"))
+      m_menuWindow(assetMan.getTexture("BlackAndWhiteUI")),
+      m_leftMenuLabel(
+        assetMan.getFont("gameFont"), 
+        assetMan.getTexture("BlackAndWhiteUI"), 
+        BannerType::WhiteBanner1, 
+        "Menu", 49, sf::Color::Black, 4.0f, 
+        {345.f, 60.0f}
+      ),
+      m_rightArrowButton(
+        assetMan.getTexture("BlackAndWhiteUI"), 
+        ButtonType::RightArrow, 9.f, 
+        {40.f, UI::SCREEN_H / 2}
+      ),
+      m_leftArrowButton(
+        assetMan.getTexture("BlackAndWhiteUI"), 
+        ButtonType::LeftArrow, 9.f, 
+        {35.f, UI::SCREEN_H / 2}
+      )
   {
     m_menuWindow.setTextureRect(sf::IntRect({6, 80}, {86, 112}));
-    m_menuWindow.setPosition({200.f, 300.f});
+    m_menuWindow.setPosition({MENU_START_X, MENU_START_Y + 100.f});
     m_menuWindow.setScale({8.f, 8.f});
-
-    const sf::Texture& uiTexture = m_assetMan.getTexture("BlackAndWhiteUI");
-
-    m_leftMenuLabel.setupWithBanner(
-        "Menu",
-        49, sf::Color::Black,
-        {275.f, 200.0f},
-        true,
-        uiTexture,
-        BannerType::WhiteBanner1,
-        4.0f,
-        {0.0f, 0.0f}
-      );
-
-    m_menuWindow.setPosition({15.f, 167.f});
-
-    m_rightArrowButton.setupNoText(uiTexture, sf::IntRect({70, 226}, {8, 12}), 9.f, {30,525});
-    m_leftArrowButton.setupNoText(uiTexture, sf::IntRect({52, 226}, {8, 12}), 9.f, {30,525});
   }
 
     //handle mouse clicks

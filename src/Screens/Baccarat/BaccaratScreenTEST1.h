@@ -17,8 +17,6 @@
 //this will be removed when server is done (server should handle baccarat logic not client)
 #include "../../logic/baccarat/baccarat_table.h"
 
-
-
 class BaccaratScreenTEST1 : public Screen
 {
 private:
@@ -32,7 +30,7 @@ private:
 
   // PLAYERS
   Player m_emptyPlayer; // empty player
-  PlayerTab m_playerTab;
+  //PlayerTab m_playerTab;
   std::vector<Player> activePlayers;
 
   // MENU
@@ -48,13 +46,13 @@ public:
   //so we initialize m_playerTab in the initializer list
   BaccaratScreenTEST1(SharedData &sharedData) :
     Screen(sharedData),
-    m_playerTab(
-      sharedData.s_assets.getFont("gameFont"),
-      sharedData.s_assets.getFont("gameNumbersFont"),
-      sharedData.s_assets.getTexture("HUD_Coin"),
-      m_emptyPlayer,
-      sf::Vector2f{10.f, 10.f}
-    ),
+//  m_playerTab(
+//    sharedData.s_assets.getFont("gameFont"),
+//    sharedData.s_assets.getFont("gameNumbersFont"),
+//    sharedData.s_assets.getTexture("HUD_Coin"),
+//    m_emptyPlayer,
+//    sf::Vector2f{10.f, 10.f}
+//  ),
     m_tableChipRack(sharedData.s_testPlayer, sharedData.s_assets),
     m_leftMenu(sharedData.s_testPlayer, sharedData.s_assets),
     m_baccaratArea(sharedData.s_assets, 350.f, 75.0f, 1200.0f, 545.0f),
@@ -66,7 +64,7 @@ public:
     tableBackground.setFillColor(sf::Color(35, 107, 0)); // Casino green
 
     // init the playerHUD
-    m_playerTab.hud.setPlayer(&sharedData.s_testPlayer);
+    //m_playerTab.hud.setPlayer(&sharedData.s_testPlayer);
 
   }
 
@@ -82,8 +80,8 @@ public:
     }
 
     // 2. Check other Screen-level UI
-    if (m_playerTab.bounds.contains(mousePos)) 
-      return "Player HUD";
+//  if (m_playerTab.bounds.contains(mousePos)) 
+//    return "Player HUD";
 
     if (tableBackground.getGlobalBounds().contains(mousePos)) 
       return "Floor";
@@ -119,7 +117,7 @@ public:
     sf::Vector2i mousePosWindow = sf::Mouse::getPosition(window);
     sf::Vector2f mouseCoords = window.mapPixelToCoords(mousePosWindow);
 
-    m_playerTab.hud.update();
+    //m_playerTab.hud.update();
     m_tableChipRack.update(mouseCoords);
     m_leftMenu.update(mouseCoords);
 
@@ -154,7 +152,7 @@ public:
     m_baccaratArea.draw(window);
     m_tableChipRack.draw(window);
 
-    m_playerTab.hud.draw(window);
+    //m_playerTab.hud.draw(window);
     m_leftMenu.draw(window);
 
     m_cursorText.draw(window);

@@ -3,7 +3,8 @@
 #include <vector>
 
 #include "Area.h"
-#include "textLabel.h"
+#include "Label.h"
+#include "Button.h"
 #include "CardSprite.h"
 #include "../core/AssetManager.h"
 
@@ -24,25 +25,23 @@ class BaccaratArea : public Area
     std::vector<CardSprite> m_playerCards;
     std::vector<CardSprite> m_bankerCards;
 
-    // Betting zone placeholders 
-    // FIX: these should be buttons
-    Label m_bankerLabel;
-    Label m_playerLabel;
-    Label m_tieLabel;
+    Button m_bankerBetButton;
+    Button m_playerBetButton;
+    Button m_tieBetButton;
 
     AssetManager *m_assetMan;
 
   public:
     BaccaratArea(AssetManager& assetMan, float x, float y, float w, float h)
       : Area(x, y, w, h),
-      m_bankerLabel(assetMan.getFont("gameFont")),
-      m_playerLabel(assetMan.getFont("gameFont")),
-      m_tieLabel(assetMan.getFont("gameFont")),
-      m_bankerZoneLabel(assetMan.getFont("gameFont")),
-      m_playerZoneLabel(assetMan.getFont("gameFont"))
+      m_bankerZoneLabel(assetMan.getFont("gameFont"), "BANKER", 80, sf::Color(200, 235, 255), {0.0f, 0.0f}, true),
+      m_playerZoneLabel(assetMan.getFont("gameFont"), "PLAYER", 80, sf::Color(255, 200, 200), {0.0f, 0.0f}, true),
+      // the buttonscale doesnt actually matter here because we are changing it below
+      m_bankerBetButton(assetMan.getTexture("BlackAndWhiteUI"), assetMan.getFont("gameFont"), sf::Color::Black, ButtonType::WhiteButton1, "BANKER", 1.0f, {0.f,0.f}),
+      m_playerBetButton(assetMan.getTexture("BlackAndWhiteUI"), assetMan.getFont("gameFont"), sf::Color::Black, ButtonType::WhiteButton1, "PLAYER", 1.0f, {0.f,0.f}),
+      m_tieBetButton(assetMan.getTexture("BlackAndWhiteUI"), assetMan.getFont("gameFont"), sf::Color::Black, ButtonType::WhiteButton2, "TIE", 1.0f, {0.f,0.f})
   {
     m_assetMan = &assetMan;
-    const sf::Texture& uiTexture = assetMan.getTexture("BlackAndWhiteUI");
 
     sf::Color blue(0, 0, 255);
     sf::Color red(255, 0, 0);
@@ -51,56 +50,10 @@ class BaccaratArea : public Area
     sf::Color bananaYellow(255, 235, 100);
     sf::Color softYellow(255, 245, 150);
 
-    m_bankerZoneLabel.setup(
-        "BANKER", 
-        80,
-        lightBlue,
-        {0.0f, 0.0f},
-        true
-        );
-    m_playerZoneLabel.setup(
-        "PLAYER", 
-        80,
-        lightRed,
-        {0.0f, 0.0f},
-        true
-        );
-
-    m_bankerLabel.setupWithBanner(
-        "BANKER", 
-        80, lightBlue,
-        {0,0},
-        true,
-        uiTexture,
-        BannerType::WhiteBanner1,
-        8.0f,
-        {0.0f, 0.0f}
-        );
-    m_bankerLabel.setColor(blue);
-
-    m_playerLabel.setupWithBanner(
-        "PLAYER", 
-        80, lightRed,
-        {0,0},
-        true,
-        uiTexture,
-        BannerType::WhiteBanner1,
-        8.0f,
-        {0.0f, 0.0f}
-        );
-    m_playerLabel.setColor(red);
-
-    m_tieLabel.setupWithBanner(
-        "TIE", 
-        50, softYellow,
-        {0,0},
-        true,
-        uiTexture,
-        BannerType::WhiteBanner2,
-        6.0f,
-        {0.0f, 0.0f}
-        );
-    m_tieLabel.setColor(bananaYellow);
+    // Set custom button colors (Normal, Hover, Active)
+    m_bankerBetButton.setColors(blue, sf::Color(50, 50, 255), sf::Color(0, 0, 150));
+    m_playerBetButton.setColors(red, sf::Color(255, 50, 50), sf::Color(150, 0, 0));
+    m_tieBetButton.setColors(bananaYellow, sf::Color(255, 255, 150), sf::Color(200, 180, 50));
 
     updateInternalLayout();
   }
@@ -114,6 +67,7 @@ class BaccaratArea : public Area
       float cardScale = 1.0f;
       float labelScale = 1.0f;
       unsigned int charSize = 50;
+      float buttonScale = 7.0f;
       float cardOffset = 0.f;
 
       // 2. Assign the specific layout numbers based on the menu state
@@ -128,6 +82,7 @@ class BaccaratArea : public Area
         cardYOffset = 200.0f;
         cardScale = 1.0f;
         labelScale = 7.0f;
+        buttonScale = 7.0f;
         charSize = 50;
         cardOffset = 160.f;
       }
@@ -142,6 +97,7 @@ class BaccaratArea : public Area
         cardYOffset = 200.0f;
         cardScale = 0.75f;
         labelScale = 6.f;
+        buttonScale = 6.f;
         charSize = 40;
         cardOffset = 130.f;
       }
@@ -166,13 +122,13 @@ class BaccaratArea : public Area
       m_playerZoneLabel.setPosition({zoneLabelPlayerX + m_x, zoneLabelY});
 
       // 4. Apply positions to labels
-      m_tieLabel.setPosition({centerX, labelY});
-      m_bankerLabel.setPosition({bankerX, labelY});
-      m_playerLabel.setPosition({playerX, labelY});
+      m_bankerBetButton.setPosition({bankerX, labelY});
+      m_playerBetButton.setPosition({playerX, labelY});
+      m_tieBetButton.setPosition({centerX, labelY});
 
-      m_tieLabel.setScale(labelScale, charSize);
-      m_bankerLabel.setScale(labelScale, charSize);
-      m_playerLabel.setScale(labelScale, charSize);
+      m_bankerBetButton.setScale(buttonScale);
+      m_playerBetButton.setScale(buttonScale);
+      m_tieBetButton.setScale(buttonScale);
 
       m_area.setPosition({m_x, m_y});
       m_area.setSize({m_w, m_h});
@@ -207,9 +163,9 @@ class BaccaratArea : public Area
     void drawGameElements(sf::RenderWindow &window) override
     {
       // betting zones these should be buttons
-      m_bankerLabel.draw(window);
-      m_playerLabel.draw(window);
-      m_tieLabel.draw(window);
+      m_bankerBetButton.draw(window);
+      m_playerBetButton.draw(window);
+      m_tieBetButton.draw(window);
 
       //zone labels
       m_bankerZoneLabel.draw(window);

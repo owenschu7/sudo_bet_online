@@ -11,7 +11,7 @@ enum class ScreenState
   Loading,
   MainMenu,
   Map,
-  Shop,
+  Skills,
   Settings,
   Tables,
   Baccarat,

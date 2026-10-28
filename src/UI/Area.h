@@ -33,7 +33,7 @@ class Area {
       //set up the green felt rectangle
       m_area.setFillColor(sf::Color(0, 100, 0)); // Dark Green
       m_area.setOutlineThickness(20);
-      m_area.setOutlineColor(sf::Color(139, 69, 19)); // Brown wood border
+      m_area.setOutlineColor(sf::Color(0, 125, 0)); // Brown wood border
     }
 
     virtual ~Area() {}

@@ -2,8 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include <imgui.h>
 #include "../core/Debug.h"
-#include "../UI/menuButton.h"
-#include "../UI/textLabel.h"
+#include "../UI/Button.h"
+#include "../UI/Label.h"
 #include "../UI/UIHelper.h"
 #include "../UI/background/ParallaxBackground.h"
 
@@ -13,7 +13,7 @@ class MainMenuScreen : public Screen
 {
 private:
   Button m_mapButton;
-  Button m_shopButton;
+  Button m_skillsButton;
   Button m_joinTablesButton;
   Button m_settingsButton;
   Button m_exitButton;
@@ -246,7 +246,49 @@ private:
 
 public:
   MainMenuScreen(SharedData &sharedData)
-    : Screen(sharedData), m_usernameDisplay(sharedData.s_assets.getFont("gameFont"))
+    : Screen(sharedData),
+      // 1. Initialize Username Label (Text-Only Constructor)
+      m_usernameDisplay(
+          sharedData.s_assets.getFont("gameFont"), 
+          "Username: ", 30, sf::Color::White, 
+          {30.0f, UI::SCREEN_H - 60.0f}, false
+      ),
+      // 2. Initialize Text Buttons
+      m_mapButton(
+          sharedData.s_assets.getTexture("BlackAndWhiteUI"), 
+          sharedData.s_assets.getFont("gameFont"), 
+          sf::Color::White,
+          ButtonType::MenuDefault, "Map", 3.0f, 
+          {UI::SCREEN_W / 2.0f, 550.0f + 40.5f}
+      ),
+      m_skillsButton(
+          sharedData.s_assets.getTexture("BlackAndWhiteUI"), 
+          sharedData.s_assets.getFont("gameFont"), 
+          sf::Color::White,
+          ButtonType::MenuDefault, "Skills", 3.0f, 
+          {UI::SCREEN_W / 2.0f, 550.0f + 80.0f + 40.5f}
+      ),
+      m_joinTablesButton(
+          sharedData.s_assets.getTexture("BlackAndWhiteUI"), 
+          sharedData.s_assets.getFont("gameFont"), 
+          sf::Color::White,
+          ButtonType::MenuDefault, "Join Table", 3.0f, 
+          {UI::SCREEN_W / 2.0f, 550.0f + 160.0f + 40.5f}
+      ),
+      m_settingsButton(
+          sharedData.s_assets.getTexture("BlackAndWhiteUI"), 
+          sharedData.s_assets.getFont("gameFont"), 
+          sf::Color::White,
+          ButtonType::MenuDefault, "Settings", 3.0f, 
+          {UI::SCREEN_W / 2.0f, 550.0f + 240.0f + 40.5f}
+      ),
+      m_exitButton(
+          sharedData.s_assets.getTexture("BlackAndWhiteUI"), 
+          sharedData.s_assets.getFont("gameFont"), 
+          sf::Color::White,
+          ButtonType::MenuDefault, "Exit", 3.0f, 
+          {UI::SCREEN_W / 2.0f, 550.0f + 320.0f + 40.5f}
+      )
   {
     //set up a dark blue background for the menu
     menuBackground.setSize(sf::Vector2f({1920.0f, 1080.0f}));
@@ -263,27 +305,6 @@ public:
     m_parallax.addLayer(sharedData.s_assets.getTexture("starsBackground"), 5.0f, bgScale);
     m_parallax.addLayer(sharedData.s_assets.getTexture("cloudsBackground"), 20.0f, bgScale);
 
-    // 3. Setup buttons
-    float btnScale = 3.0f;
-    sf::IntRect emptyButtonCrop({99, 35}, {90, 27});
-
-    // scaledW = how wide the button will actually appear on screen
-    float scaledW = emptyButtonCrop.size.x * btnScale;
-    float centerX = (UI::SCREEN_W - scaledW) / 2.0f;
-    float startY  = 550.0f;
-    float spacing = 80.0f;
-
-    const sf::Texture& uiTex = sharedData.s_assets.getTexture("BlackAndWhiteUI");
-    const sf::Font& font = sharedData.s_assets.getFont("gameFont");
-
-    m_mapButton.setup(uiTex, emptyButtonCrop, font, "Map", btnScale, 40, {centerX, startY});
-    m_shopButton.setup(uiTex, emptyButtonCrop, font, "Shop", btnScale, 40, {centerX, (startY + spacing)});
-    m_joinTablesButton.setup(uiTex, emptyButtonCrop, font, "Join Table", btnScale, 40, {centerX, startY + (spacing * 2)});
-    m_settingsButton.setup(uiTex, emptyButtonCrop, font, "Settings", btnScale, 40, {centerX, startY + (spacing * 3)});
-    m_exitButton.setup(uiTex, emptyButtonCrop, font, "Exit", btnScale, 40,{centerX, startY + (spacing * 4)});
-
-    //setup labels
-    m_usernameDisplay.setup("Username: ", 30, sf::Color::White, {30.0f, UI::SCREEN_H - 60.0f}, false);
   }
 
   //handle events that came in from server to the client
@@ -314,9 +335,9 @@ public:
     {
       m_nextState = ScreenState::Map;
     }
-    if (m_shopButton.isClicked(mousePos, event))
+    if (m_skillsButton.isClicked(mousePos, event))
     {
-      m_nextState = ScreenState::Shop;
+      m_nextState = ScreenState::Skills;
     }
     if (m_joinTablesButton.isClicked(mousePos, event))
     {
@@ -335,9 +356,13 @@ public:
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
       //pressing "Enter" signals we want to switch to the game state
-      if (keyPressed->scancode == sf::Keyboard::Scancode::Enter)
+      if (keyPressed->scancode == sf::Keyboard::Scancode::Q)
       {
         m_nextState = ScreenState::BaccaratTEST1;
+      }
+      if (keyPressed->scancode == sf::Keyboard::Scancode::W)
+      {
+        m_nextState = ScreenState::Blackjack;
       }
       if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
       {
@@ -360,7 +385,7 @@ public:
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
     m_mapButton.update(mousePos);
-    m_shopButton.update(mousePos);
+    m_skillsButton.update(mousePos);
     m_joinTablesButton.update(mousePos);
     m_settingsButton.update(mousePos);
     m_exitButton.update(mousePos);
@@ -395,7 +420,7 @@ public:
     // draw play button, settings button
     //window.draw(menuBackground);
     m_mapButton.draw(window);
-    m_shopButton.draw(window);
+    m_skillsButton.draw(window);
     m_joinTablesButton.draw(window);
     m_settingsButton.draw(window);
     m_exitButton.draw(window);
